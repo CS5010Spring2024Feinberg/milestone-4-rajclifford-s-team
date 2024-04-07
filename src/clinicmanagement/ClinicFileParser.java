@@ -9,6 +9,7 @@ import java.io.Reader;
  */
 public class ClinicFileParser implements ClinicFileParserInterface {
   private Reader reader;
+  private String clinicName;
 
   /**
    * Constructs a new ClinicFileParser with the specified Reader.
@@ -21,6 +22,23 @@ public class ClinicFileParser implements ClinicFileParserInterface {
       throw new IllegalArgumentException("Reader cannot be null.");
     }
     this.reader = reader;
+  }
+
+  /**
+   * Parses the name of the clinic from a BufferedReader and returns it.
+   *
+   * @param reader The BufferedReader containing the clinic name.
+   * @return The name of the clinic.
+   * @throws IOException if an I/O error occurs while reading from the reader.
+   * @throws IllegalArgumentException if the clinic name is empty.
+   */
+  public String parseClinicName(BufferedReader reader) throws IOException {
+    String name = reader.readLine().trim();
+    if (name.isEmpty()) {
+      throw new IllegalArgumentException("Clinic name cannot be empty.");
+    }
+    this.clinicName = name;
+    return clinicName;
   }
 
   /**
@@ -209,4 +227,6 @@ public class ClinicFileParser implements ClinicFileParserInterface {
       throw new IllegalArgumentException("Invalid patient room number: " + patientRoomNumber);
     }
   }
+
+
 }

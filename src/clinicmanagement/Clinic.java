@@ -965,43 +965,7 @@ public class Clinic implements ClinicInterface {
     }
   }
 
-  /**
-   * Assigns a clinical staff member to a patient.
-   *
-   * @param patientToStaff The patient to whom the clinical staff member will be assigned.
-   * @param serialNumber The serial number of the clinical staff member to assign.
-   * @param controller The controller object used for certain operations.
-   */
-  @Override
-  public void assignClinicalStaffToPatient(Patient patientToStaff,
-                                           int serialNumber,
-                                           AssignPatientToStaffCommand controller)
 
-      throws IllegalArgumentException {
-    // Check if the clinical staff member is already assigned to the patient
-    ClinicalStaff clinicalStaffMember
-        = ClinicalStaff.findClinicalStaffBySerialNumber(this, serialNumber);
-    if (clinicalStaffMember != null && !clinicalStaffMember.getAssignedPatients()
-        .contains(patientToStaff) && !clinicalStaffMember.isDeactivated()) {
-      // Check if the patient is already assigned to the clinical staff member
-      if (!patientToStaff.getAssignedClinicalStaff().contains(clinicalStaffMember)) {
-        patientToStaff.getAssignedClinicalStaff().add(clinicalStaffMember);
-        clinicalStaffMember.getAssignedPatients().add(patientToStaff);
-        clinicalStaffMember.assignPatientforCount(patientToStaff);
-        // This line updates the unique patient count.
-        System.out.println(clinicalStaffMember.getFullName()
-            + " has been added to the patient's care team.");
-      } else {
-        System.out.println("Error: The patient is already"
-            +
-            " assigned to this clinical staff member.");
-      }
-    } else {
-      System.out.println("Error: The selected staff member is"
-          +
-          " not a clinical staff or is already assigned to the patient.");
-    }
-  }
 
   /**
    * Lists clinical staff members who have at least one assigned patient with an incomplete visit.
