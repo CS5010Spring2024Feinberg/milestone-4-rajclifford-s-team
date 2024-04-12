@@ -2,11 +2,12 @@
 
 This repo represents the coursework for CS 5010!
 
-**Name:** put your full name here
+**Name:** Rajorshi Sarkar
+          Cliford Yin
 
-**Email:** put your Northeastern email address here
+**Email:** sarkar.r@northeastern.edu
 
-**Preferred Name:** put your preferred name here (how shall we address you)
+**Preferred Name:** Raj
 
 
 
