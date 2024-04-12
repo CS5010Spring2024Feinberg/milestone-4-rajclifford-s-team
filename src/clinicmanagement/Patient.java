@@ -1,19 +1,14 @@
 package clinicmanagement;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents a patient in a clinic.
@@ -216,6 +211,19 @@ public class Patient implements PatientInterface {
   }
 
   /**
+   * Assigns a clinical staff member to this patient.
+   *
+   * @param clinicalStaff The clinical staff to be assigned.
+   */
+  public void assignClinicalStaff(ClinicalStaff clinicalStaff) {
+    if (clinicalStaff == null) {
+      throw new IllegalArgumentException("Clinical staff cannot be null.");
+    }
+    if (!assignedClinicalStaff.contains(clinicalStaff)) {
+      assignedClinicalStaff.add(clinicalStaff);
+    }
+  }
+  /**
    * Populates room information from the given room object.
    *
    * @param room The room object from which to populate information.
@@ -342,35 +350,48 @@ public class Patient implements PatientInterface {
    * Adds a new visit record to the patient's history.
    */
   @Override
-  public void displayFullInformation() throws IllegalArgumentException {
-    // Display basic patient information
-    System.out.println("Patient Information:");
-    System.out.println("Serial Number: " + getSerialNumber()); // Display the serial number
-    System.out.println("Name: " + getFullName());
-    System.out.println("Date of Birth: " + dateOfBirth
-        .format(DateTimeFormatter.ofPattern("M/d/yyyy")));
-    System.out.println("Room Number: " + roomNumber);
-    System.out.println("Room Name: " + roomName);
-    System.out.println("Room Type: "
-        + (roomType != null ? roomType.getType() : "N/A")); // Check for null room type
+  public String getFullInformation() {
+    StringBuilder info = new StringBuilder();
+    info.append("Patient Information:\n");
+    info.append("Serial Number: ").append(getSerialNumber()).append("\n");
+    info.append("Name: ").append(getFullName()).append("\n");
+    info.append("Date of Birth: ").append(dateOfBirth.format(DateTimeFormatter.ofPattern("M/d/yyyy"))).append("\n");
+    info.append("Room Number: ").append(roomNumber).append("\n");
+    info.append("Room Name: ").append(roomName).append("\n");
+    info.append("Room Type: ").append(roomType != null ? roomType.getType() : "N/A").append("\n\n");
 
-    // Display visit records
     if (visitRecords.isEmpty()) {
-      System.out.println("No visit records available.");
+      info.append("No visit records available.\n");
     } else {
-      System.out.println("Visit Records:");
+      info.append("Visit Records:\n");
       for (Visitrecord visitRecord : visitRecords) {
-        // Ensure each record is displayed with all necessary details
-        System.out.println("\tRegistration Date and Time: "
-            + visitRecord.getRegistrationDateTime()
-            .format(DateTimeFormatter.ofPattern("M/d/yyyy HH:mm:ss")));
-        System.out.println("\tChief Complaint: " + visitRecord.getChiefComplaint());
-        System.out.println("\tBody Temperature: "
-            + String.format("%.1f°C", visitRecord.getBodyTemperature()));
-        System.out.println("\t--------------------------"); // Separator for readability
+        info.append("\tRegistration Date and Time: ")
+            .append(visitRecord.getRegistrationDateTime().format(DateTimeFormatter.ofPattern("M/d/yyyy HH:mm:ss")))
+            .append("\n\tChief Complaint: ")
+            .append(visitRecord.getChiefComplaint())
+            .append("\n\tBody Temperature: ")
+            .append(String.format("%.1f°C", visitRecord.getBodyTemperature()))
+            .append("\n\t--------------------------\n");
       }
     }
+
+    // Append only active assigned clinical staff
+    List<ClinicalStaff> activeAssignedStaff = getAssignedClinicalStaff().stream()
+        .filter(staff -> !staff.isDeactivated())
+        .collect(Collectors.toList());
+
+    if (!activeAssignedStaff.isEmpty()) {
+      info.append("Assigned Clinical Staff:\n");
+      for (ClinicalStaff staff : activeAssignedStaff) {
+        info.append("\t- ").append(staff.getPrefix()).append(" ").append(staff.getFullName()).append("\n");
+      }
+    } else {
+      info.append("No clinical staff assigned.\n");
+    }
+
+    return info.toString();
   }
+
 
   /**
    * Computes the hash code for the patient based on their serial number.
@@ -471,6 +492,80 @@ public class Patient implements PatientInterface {
 
   }
 
+  public void addVisitRecordForPatient(GuiController guiController) {
+    String registrationDateStr = JOptionPane.showInputDialog(guiController.frame, "Enter registration date (yyyy-MM-dd):");
+    if (registrationDateStr == null || registrationDateStr.trim().isEmpty()) {
+      JOptionPane.showMessageDialog(guiController.frame, "Registration date is required.", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+
+    LocalDate registrationDate;
+    try {
+      registrationDate = LocalDate.parse(registrationDateStr.trim(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    } catch (DateTimeParseException e) {
+      JOptionPane.showMessageDialog(guiController.frame, "Invalid date format. Please enter the date in yyyy-MM-dd format.", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+
+    String registrationTimeStr = JOptionPane.showInputDialog(guiController.frame, "Enter registration time (HH:mm:ss):");
+    if (registrationTimeStr == null || registrationTimeStr.trim().isEmpty()) {
+      JOptionPane.showMessageDialog(guiController.frame, "Registration time is required.", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+
+    LocalTime registrationTime;
+    try {
+      registrationTime = LocalTime.parse(registrationTimeStr.trim(), DateTimeFormatter.ofPattern("HH:mm:ss"));
+    } catch (DateTimeParseException e) {
+      JOptionPane.showMessageDialog(guiController.frame, "Invalid time format. Please enter the time in HH:mm:ss format.", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+
+    LocalDateTime registrationDateTime = LocalDateTime.of(registrationDate, registrationTime);
+    if (!Visitrecord.isValidDate(registrationDateTime)) {
+      JOptionPane.showMessageDialog(guiController.frame, "The registration date and time are invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+
+    String chiefComplaint = JOptionPane.showInputDialog(guiController.frame, "Enter chief complaint:");
+    if (!Visitrecord.isValidComplaint(chiefComplaint)) {
+      JOptionPane.showMessageDialog(guiController.frame, "Chief complaint is required.", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+
+    String bodyTemperatureStr = JOptionPane.showInputDialog(guiController.frame, "Enter body temperature in Celsius (e.g., 37.5):");
+    if (bodyTemperatureStr == null || bodyTemperatureStr.trim().isEmpty()) {
+      JOptionPane.showMessageDialog(guiController.frame, "Body temperature is required.", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+
+    double bodyTemperature;
+    try {
+      bodyTemperature = Double.parseDouble(bodyTemperatureStr.trim());
+      if (!Visitrecord.isValidTemperature(bodyTemperature)) {
+        throw new IllegalArgumentException("Body temperature is out of the normal range.");
+      }
+    } catch (NumberFormatException e) {
+      JOptionPane.showMessageDialog(guiController.frame, "Invalid body temperature. Please enter a valid numeric value within the normal range.", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    } catch (IllegalArgumentException e) {
+      JOptionPane.showMessageDialog(guiController.frame, "Invalid body temperature. Please enter a valid numeric value within the normal range.", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+
+    addVisitRecord(registrationDateTime, chiefComplaint, bodyTemperature);
+    JOptionPane.showMessageDialog(guiController.frame, "Visit record added successfully for " + getFullName(), "Success", JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  public void displayPatientFullInformation(GuiController guiController) {
+    String patientInfo = getFullInformation();
+    JTextArea textArea = new JTextArea(6, 25);
+    textArea.setText(patientInfo);
+    textArea.setEditable(false);
+    JScrollPane scrollPane = new JScrollPane(textArea);
+    JOptionPane.showMessageDialog(guiController.frame, scrollPane, "Patient Full Information", JOptionPane.INFORMATION_MESSAGE);
+  }
+
   /**
    * Represents a deactivation and reactivation record for a patient.
    * This private static class is used internally to track the deactivation
@@ -520,8 +615,13 @@ public class Patient implements PatientInterface {
     }
   }
 
-
+  @Override
+  public String toString() {
+    return firstName + " " + lastName + " - DOB: " + dateOfBirth;
+  }
 }
+
+
 
 
 

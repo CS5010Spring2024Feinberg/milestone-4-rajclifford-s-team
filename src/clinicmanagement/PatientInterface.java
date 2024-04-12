@@ -128,10 +128,9 @@ public interface PatientInterface {
    */
   List<Visitrecord> getVisitRecords();
 
-  /**
-   * Populate display record.
-   */
-  void displayFullInformation();
+
+
+  String getFullInformation();
 
   /**
    * Forced deactivation in the past.

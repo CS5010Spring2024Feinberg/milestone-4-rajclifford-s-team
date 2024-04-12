@@ -130,10 +130,8 @@ public interface ClinicInterface {
    */
   void displayAvailableRooms();
 
-  /**
-   * Prints the list of clinical staff.
-   */
-  void printClinicalStaffList();
+
+
 
   /**
    * Prints the list of all staff members.
@@ -240,4 +238,6 @@ public interface ClinicInterface {
    * @return the existing patient
    */
   Patient findExistingPatient(Patient newPatient);
+
+  List<Patient> getAllPatients() throws IllegalArgumentException;
 }
