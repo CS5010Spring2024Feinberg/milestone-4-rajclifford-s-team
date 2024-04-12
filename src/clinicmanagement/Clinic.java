@@ -1,6 +1,7 @@
 package clinicmanagement;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
@@ -27,8 +28,6 @@ public class Clinic implements ClinicInterface {
   private final Map<Room, Patient> roomAssignments;
   private final Map<Room, List<Patient>> waitingRoomAssignments;
   private final Map<Patient, List<Staff>> patientAssignments;
-  private int roomNumber;
-  private LocalDate dob;
 
   /**
    * Constructs a new clinic with empty lists and maps for rooms, patients, staff, and assignments.
@@ -122,6 +121,7 @@ public class Clinic implements ClinicInterface {
    * @return The registered or reactivated patient object.
    * @throws IllegalArgumentException if the patient object is null.
    */
+  @Override
   public Patient registerNewPatient(Patient newPatient) throws IllegalArgumentException {
     if (newPatient == null) {
       throw new IllegalArgumentException("Patient object cannot be null");
@@ -167,25 +167,6 @@ public class Clinic implements ClinicInterface {
   }
 
   /**
-   * Prints the list of rooms in the clinic, including room number, type, and name.
-   * Each room's details are displayed with a separator.
-   */
-  @Override
-  public void printRoomList() throws IllegalArgumentException {
-    if (rooms == null) {
-      throw new IllegalArgumentException("Room list cannot be null.");
-    }
-
-    System.out.println("\nList of Rooms:");
-    for (Room room : rooms) {
-      System.out.println("Room Number: " + room.getRoomNumber());
-      System.out.println("Room Type: " + room.getType().getType());
-      System.out.println("Room Name: " + room.getName());
-      System.out.println("--------------------------");
-    }
-  }
-
-  /**
    * Returns a Room object based on the room number.
    *
    * @param roomNumber The room number to search for.
@@ -209,6 +190,7 @@ public class Clinic implements ClinicInterface {
    * return a list of rooms.
    * @return a list of rooms.
    */
+  @Override
   public List<Room> getRooms() {
     return rooms;
   }
@@ -274,6 +256,7 @@ public class Clinic implements ClinicInterface {
   }
 
 
+  @Override
   public void assignClinicalStaffToPatient(Patient patientToStaff, ClinicalStaff clinicalStaffMember) {
     if (clinicalStaffMember != null && !clinicalStaffMember.isDeactivated()) {
       if (!clinicalStaffMember.getAssignedPatients().contains(patientToStaff)) {
@@ -402,50 +385,6 @@ public class Clinic implements ClinicInterface {
     return null; // Patient not found
   }
 
-  /**
-   * Searches for and returns a Patient object that matches the given
-   * first name, last name, and date of birth.
-   *
-   * This method iterates through the list of patients and compares each patient's
-   * first name, last name,
-   * and date of birth with the provided parameters. The comparison of first name
-   * and last name is case-insensitive,
-   * while the date of birth must match exactly.
-   *
-   * @param firstName the first name of the patient to find, case-insensitive
-   * @param lastName  the last name of the patient to find, case-insensitive
-   * @param dobStr    the date of birth of the patient to find, formatted as
-   *                  "yyyy-MM-dd"
-   * @return          the Patient object that matches the given names
-   *                  and date of birth, or {@code null} if no such patient is found
-   * @throws DateTimeParseException if the {@code dobStr} does not match the
-   *                  "yyyy-MM-dd" pattern
-   */
-  public Patient findPatientByNameAndDob(String firstName, String lastName, String dobStr)
-      throws IllegalArgumentException {
-    // Validate parameters
-    if (firstName == null || lastName == null || dobStr == null) {
-      throw new IllegalArgumentException("First name, last name, and date of "
-          +
-          "birth cannot be null.");
-    }
-    try {
-      dob = LocalDate.parse(dobStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-    } catch (DateTimeParseException e) {
-      throw new IllegalArgumentException("Invalid date of birth format. "
-          +
-          "Please provide date in yyyy-MM-dd format.", e);
-    }
-    for (Patient patient : patients) {
-      if (patient.getFirstName().equalsIgnoreCase(firstName)
-          && patient.getLastName().equalsIgnoreCase(lastName)
-          && patient.getDateOfBirth().equals(dob)) {
-        return patient;
-      }
-    }
-    return null; // No matching patient found
-  }
-
 
   /**
    * Finds a clinical staff member by their first name and last name.
@@ -524,6 +463,7 @@ public class Clinic implements ClinicInterface {
     }
   }
 
+  @Override
   public List<ClinicalStaff> getClinicalStaffList() {
     List<ClinicalStaff> clinicalStaffList = new ArrayList<>();
     for (Staff staffMember : staff) {
@@ -537,6 +477,7 @@ public class Clinic implements ClinicInterface {
   /**
    * Prints a list of clinical staff members.
    */
+  @Override
   public void showClinicalStaffList(JFrame frame) {
     if (staff == null) {
       throw new IllegalArgumentException("Staff list cannot be null.");
@@ -564,44 +505,6 @@ public class Clinic implements ClinicInterface {
     JOptionPane.showMessageDialog(frame, staffListBuilder.toString(), "Clinical Staff List", JOptionPane.INFORMATION_MESSAGE);
   }
 
-
-  /**
-   * Prints a list of staff members.
-   */
-  @Override
-  public void printStaffList() throws IllegalArgumentException {
-    if (staff == null) {
-      throw new IllegalArgumentException("Staff list cannot be null.");
-    }
-    System.out.println("Staff List:");
-    for (Staff staffMember : staff) {
-      String prefix = "";
-      if (staffMember instanceof ClinicalStaff) {
-        ClinicalStaff clinicalStaff = (ClinicalStaff) staffMember;
-        if (clinicalStaff.isDeactivated()) {
-          continue; // Skip deactivated clinical staff
-        }
-        prefix = clinicalStaff.getPrefix();
-      } else {
-        NonClinicalStaff nonClinicalStaff = (NonClinicalStaff) staffMember;
-        if (nonClinicalStaff.isDeactivated()) {
-          continue; // Skip deactivated non-clinical staff
-        }
-      }
-      System.out.println("Serial Number: " + staffMember.getSerialNumber());
-      System.out.println("Name: " + prefix + " " + staffMember.getFullName());
-      if (staffMember instanceof ClinicalStaff) {
-        ClinicalStaff clinicalStaff = (ClinicalStaff) staffMember;
-        System.out.println("Job Title: " + clinicalStaff.getJobTitle());
-        System.out.println("Education Level: " + clinicalStaff.getEducationLevel());
-        System.out.println("Unique Identifier (NPI): " + clinicalStaff.getNpi());
-      } else {
-        NonClinicalStaff nonClinicalStaff = (NonClinicalStaff) staffMember;
-        System.out.println("Job Title: " + nonClinicalStaff.getJobTitle());
-      }
-      System.out.println("--------------------------");
-    }
-  }
 
   /**
    * Checks if a room is occupied, specifically for "procedure" and "exam" rooms.
@@ -908,368 +811,6 @@ public class Clinic implements ClinicInterface {
     }
   }
 
-  /**
-   * Deactivates a staff member based on the provided serial number.
-   * If the operation is successful, the staff member is deactivated,
-   * and any assigned patients are disassociated from the clinical staff member.
-   *
-   * @param sc the scanner used to read user input
-   * @return true if the staff member is successfully deactivated,
-   *        false if the operation is cancelled
-   */
-  public boolean deactivateStaff(Scanner sc) throws IllegalArgumentException {
-    System.out.println("Enter the serial number of the "
-        +
-        "staff member to deactivate, or enter 'q' to quit:");
-
-    while (true) {
-      String input = sc.nextLine().trim();
-      if ("q".equalsIgnoreCase(input)) {
-        System.out.println("Operation cancelled.");
-        return false; // Indicates the user opted to cancel the operation
-      }
-
-      try {
-        // Attempt to parse the input as an integer
-        int serialNumber = Integer.parseInt(input);
-
-        // Check if the parsed number is less than or equal to zero
-        if (serialNumber <= 0) {
-          System.out.println("Error: Invalid serial number. "
-              +
-              "Serial number must be a positive integer.");
-          continue; // Illegal argument provided, continue to prompt for input
-        }
-
-        boolean found = false;
-        for (Staff staffMember : staff) {
-          if (staffMember.getSerialNumber() == serialNumber && !staffMember.isDeactivated()) {
-            found = true;
-
-            // Check if the staff member is a clinical staff
-            if (staffMember instanceof ClinicalStaff) {
-              ClinicalStaff clinicalStaff = (ClinicalStaff) staffMember;
-
-              // Remove the assigned patients from the clinical staff member
-              List<Patient> assignedPatients = clinicalStaff.getAssignedPatients();
-              for (Patient patient : assignedPatients) {
-                patient.getAssignedClinicalStaff().remove(clinicalStaff);
-              }
-              assignedPatients.clear(); // Clear the list of assigned patients
-            }
-            // Deactivate the staff member
-            staffMember.setDeactivated(true);
-            System.out.println("Staff member with serial number " + serialNumber
-                + " deactivated successfully.");
-            return true;
-          }
-        }
-        if (!found) {
-          throw new IllegalArgumentException("Error: Staff member with serial number "
-              + serialNumber
-              + " not found or already deactivated.");
-        }
-      } catch (NumberFormatException e) {
-        // Handle the case where the input cannot be parsed as an integer
-        System.out.println("Invalid input. Please enter a valid serial number or "
-            +
-            "'q' to quit:");
-      }
-    }
-  }
-
-
-
-  /**
-   * Lists clinical staff members who have at least one assigned patient with an incomplete visit.
-   * For each clinical staff member, lists the currently assigned patients.
-   */
-  public void listClinicalStaffWithIncompleteVisits() throws IllegalArgumentException {
-    System.out.println("Clinical Staff with Active Patients:");
-    for (Staff staffMember : staff) { // Directly using the staff member variable
-      if (staffMember instanceof ClinicalStaff && !staffMember.isDeactivated()) {
-        ClinicalStaff clinicalStaff = (ClinicalStaff) staffMember;
-        List<Patient> assignedPatients = clinicalStaff.getAssignedPatients();
-        boolean hasIncompleteVisit = false;
-        for (Patient patient : assignedPatients) {
-          if (!patient.isDeactivated()) { // Corrected logic for incomplete visit
-            hasIncompleteVisit = true;
-            break;
-          }
-        }
-        if (hasIncompleteVisit) {
-          System.out.println("Name: " + clinicalStaff.getFullName());
-          System.out.println("Job Title: " + clinicalStaff.getJobTitle());
-          System.out.println("Currently Assigned Patients with Ongoing Visits:");
-          for (Patient patient : assignedPatients) {
-            if (!patient.isDeactivated()) {
-              System.out.println("- " + patient.getFullName()); // Assuming getFullName exists
-            }
-          }
-          System.out.println("--------------------------");
-        }
-      }
-    }
-  }
-
-  /**
-   * Allows the user to unassign a clinical staff member from a patient.
-   * This method prompts the user to enter the serial number of the clinical staff member
-   * they wish to unassign from a patient, and then prompts for the serial number of the patient
-   * to unassign. The method then removes the association between the specified patient
-   * and clinical staff member.
-   *
-   * @param sc Scanner object used for user input.
-   * @return {@code true} if the unassignment operation was successful, {@code false} otherwise.
-   *         Returns {@code false} if the user cancels the operation or if there was an error.
-   */
-  @Override
-  public boolean unassignClinicalStaffFromPatient(Scanner sc)throws IllegalArgumentException {
-    System.out.println("Enter the serial number of the clinical "
-        +
-        "staff member for unassignment, or enter 'q' to quit:");
-
-    while (true) {
-      String input = sc.nextLine().trim();
-      if ("q".equalsIgnoreCase(input)) {
-        System.out.println("Operation cancelled.");
-        return false; // Indicates the user opted to cancel the operation
-      }
-
-      try {
-        int serialNumber = Integer.parseInt(input);
-        if (serialNumber <= 0) {
-          System.out.println("Error: Invalid serial number. Serial number "
-              +
-              "must be a positive integer.");
-          continue;
-        }
-
-        ClinicalStaff clinicalStaff =
-            ClinicalStaff.findClinicalStaffBySerialNumber(this, serialNumber);
-        if (clinicalStaff != null && !clinicalStaff.isDeactivated()) {
-          List<Patient> assignedPatients = clinicalStaff.getAssignedPatients();
-          if (assignedPatients.isEmpty()) {
-            System.out.println("This clinical staff member has no assigned patients.");
-            return false;
-          }
-
-          System.out.println("Assigned Patients:");
-          for (Patient patient : assignedPatients) {
-            System.out.println("Serial Number: " + patient.getSerialNumber()
-                + ", Name: " + patient.getFullName());
-          }
-
-          System.out.println("Enter the serial number of the patient to unassign, "
-              +
-              "or 'q' to quit:");
-          input = sc.nextLine().trim();
-          if ("q".equalsIgnoreCase(input)) {
-            System.out.println("Operation cancelled.");
-            return false;
-          }
-
-          int patientSerialNumber = Integer.parseInt(input);
-          Patient patientToUnassign = null;
-          for (Patient patient : assignedPatients) {
-            if (patient.getSerialNumber() == patientSerialNumber) {
-              patientToUnassign = patient;
-              break;
-            }
-          }
-
-          if (patientToUnassign != null) {
-            clinicalStaff.getAssignedPatients().remove(patientToUnassign);
-            patientToUnassign.getAssignedClinicalStaff().remove(clinicalStaff);
-            System.out.println("Clinical staff member unassigned from patient successfully.");
-            return true;
-          } else {
-            System.out.println("Error: Patient with serial number "
-                + patientSerialNumber + " not found among the assigned patients.");
-          }
-        } else {
-          System.out.println("Error: Clinical staff member with serial number "
-              + serialNumber + " not found or is deactivated.");
-        }
-      } catch (NumberFormatException e) {
-        System.out.println("Invalid input. Please enter a valid serial number or"
-            +
-            " 'q' to quit:");
-      }
-    }
-  }
-
-  /**
-   * Lists all clinical staff members along with the count of patients assigned
-   * to each staff member.
-   * For each clinical staff member, prints their full name, serial number,
-   * number of unique patients assigned, and their status (active or inactive).
-   */
-  @Override
-  public void listClinicalStaffAndPatientCounts() throws IllegalArgumentException {
-    System.out.println("Clinical Staff and Their patient Assignment Counts:");
-    for (Staff staffMember : staff) {
-      if (staffMember instanceof ClinicalStaff) {
-        ClinicalStaff clinicalStaff = (ClinicalStaff) staffMember;
-        int uniquePatientCount = clinicalStaff.getUniquePatientCount();
-        String status = clinicalStaff.isDeactivated() ? "Inactive" : "Active";
-        System.out.println("Name: " + clinicalStaff.getFullName()
-            +
-            ", Serial Number: " + clinicalStaff.getSerialNumber()
-            +
-            ", Unique Patients Assigned: " + uniquePatientCount
-            +
-            ", Status: " + status);
-      }
-    }
-  }
-
-  /**
-   * Lists patients who have not visited for more than a year.
-   * For each inactive patient based on last visit and deactivated date,
-   * prints their serial number, full name,
-   * and the date of their last visit.
-   * If no inactive patients are found, prints a message indicating
-   * that there are no inactive patients for more than a year.
-   */
-  @Override
-  public void listInactivePatientsForYear() throws IllegalArgumentException {
-    System.out.println("Listing patients who have been inactive for more than"
-        +
-        " a year and are currently deactivated:");
-    boolean foundInactivePatient = false;
-
-    for (Patient patient : patients) {
-      // Only proceed if the patient is deactivated
-      if (patient.isDeactivated()) {
-        // Get the last deactivation date
-        LocalDate lastDeactivationDate = patient.getLastDeactivationDate();
-
-        // Calculate the number of days since the last deactivation
-        long daysSinceLastDeactivation = lastDeactivationDate != null ? ChronoUnit.DAYS
-            .between(lastDeactivationDate, LocalDate.now()) : Long.MAX_VALUE;
-
-        // Check if the deactivation was over 365 days ago
-        if (daysSinceLastDeactivation > 365) {
-          foundInactivePatient = true;
-          System.out.println("Patient Serial Number: " + patient.getSerialNumber()
-              + ", Name: " + patient.getFullName()
-              + ", Last Deactivation: " + lastDeactivationDate);
-        }
-      }
-    }
-
-    if (!foundInactivePatient) {
-      System.out.println("No patients meet the criteria of being inactive for more than a year.");
-    }
-  }
-
-
-  /**
-   * Lists patients who have made two or more visits in the past 365 days.
-   * For each eligible patient, prints their full name, serial number,
-   * and the number of visits they made in the last year.
-   */
-  @Override
-  public void listPatientsWithMultipleVisitsInLastYear() throws IllegalArgumentException {
-    System.out.println("Patients with two or more visits in the past 365 days:");
-    LocalDate oneYearAgo = LocalDate.now().minusDays(365);
-
-    for (Patient patient : patients) {
-      int recentVisitCount = 0;
-
-      for (Visitrecord visitRecord : patient.getVisitRecords()) {
-        if (visitRecord.getRegistrationDateTime().toLocalDate().isAfter(oneYearAgo)) {
-          recentVisitCount++;
-        }
-      }
-
-      if (recentVisitCount >= 2) {
-        System.out.println("Patient: "
-            + patient.getFullName()
-            +
-            " - Serial Number: "
-            + patient.getSerialNumber()
-            +
-            " - Number of Visits in Last Year: "
-            + recentVisitCount);
-      }
-    }
-  }
-
-  /**
-   * Displays a list of registered patients and allows the user to
-   * select a patient by their serial number.
-   * Once a patient is selected, the method displays all clinical
-   * staff assigned to that patient.
-   * The user can interactively select a patient and view the associated
-   * clinical staff details,
-   * including their names, job titles, and NPI numbers.
-   *
-   * Usage:
-   * - The method lists all patients with their serial numbers and names.
-   * - The user is prompted to input a patient's serial number.
-   * - If a valid serial number is entered, the method displays all clinical
-   * staff assigned to the selected patient.
-   * - If no clinical staff are assigned to the patient, a message indicating
-   * this is displayed.
-   * - The user can exit the selection process by entering 'q'.
-   *
-   * @param sc The Scanner instance used to read input from the user. It should be opened
-   *           and ready to use before calling this method.
-   */
-  @Override
-  public void displayPatientStaff(Scanner sc) throws IllegalArgumentException {
-    if (patients.isEmpty()) {
-      System.out.println("There are no patients registered in the clinic.");
-      return;
-    }
-
-    System.out.println("List of Registered Patients:");
-    for (Patient patient : patients) {
-      System.out.println("Serial Number: " + patient.getSerialNumber()
-          + ", Name: " + patient.getFullName());
-    }
-
-    System.out.println("Enter the serial number of the patient to view"
-        +
-        " assigned clinical staff, or enter 'q' to quit:");
-
-    while (true) {
-      String input = sc.nextLine().trim();
-      if ("q".equalsIgnoreCase(input)) {
-        System.out.println("Operation cancelled.");
-        return;
-      }
-
-      try {
-        int serialNumber = Integer.parseInt(input);
-        Patient selectedPatient = findPatientBySerialNumber(serialNumber);
-        if (selectedPatient == null) {
-          System.out.println("Patient with serial number " + serialNumber
-              + " not found. Please try again or enter 'q' to quit:");
-        } else {
-          List<ClinicalStaff> assignedStaff = selectedPatient.getAssignedClinicalStaff();
-          if (assignedStaff.isEmpty()) {
-            System.out.println("No clinical staff are assigned to "
-                + selectedPatient.getFullName() + ".");
-          } else {
-            System.out.println("Clinical Staff assigned to "
-                + selectedPatient.getFullName() + ":");
-            for (ClinicalStaff staff : assignedStaff) {
-              System.out.println("Name: " + staff.getFullName()
-                  + ", Job Title: " + staff.getJobTitle() + ", NPI: " + staff.getNpi());
-            }
-          }
-          return;
-        }
-      } catch (NumberFormatException e) {
-        System.out.println("Invalid input. Please enter a valid "
-            +
-            "serial number or 'q' to quit:");
-      }
-    }
-  }
 
   /**
    * Finds an existing patient in the clinic based on the provided patient details.
@@ -1314,6 +855,7 @@ public class Clinic implements ClinicInterface {
   }
 
 
+  @Override
   public void registerNewPatientGUI(GuiController guiController) {
     JTextField firstNameField = new JTextField();
     JTextField lastNameField = new JTextField();
@@ -1345,6 +887,7 @@ public class Clinic implements ClinicInterface {
     }
   }
 
+  @Override
   public void assignPatientToRoomGUI(GuiController guiController) {
     try {
       List<Patient> patients = getAllPatients();
@@ -1392,6 +935,7 @@ public class Clinic implements ClinicInterface {
     }
   }
 
+  @Override
   public void addVisitRecordGUI(GuiController guiController) {
      List<Patient> patients = getAllPatients();
      if (patients.isEmpty()) {
@@ -1419,7 +963,7 @@ public class Clinic implements ClinicInterface {
        }
      }
    }
-
+  @Override
   public void registerNewClinicalStaff(GuiController guiController) {
     JTextField firstNameField = new JTextField();
     JTextField lastNameField = new JTextField();
@@ -1460,6 +1004,7 @@ public class Clinic implements ClinicInterface {
     showClinicalStaffList(guiController.frame);
   }
 
+  @Override
   public void assignStaffToPatientGUI() {
     // Select a patient
     JComboBox<Patient> patientComboBox = new JComboBox<>();
@@ -1520,6 +1065,7 @@ public class Clinic implements ClinicInterface {
   }
 
 
+  @Override
   public void sendPatientHomeGUI(GuiController guiController) {
     // Select a patient
     JComboBox<Patient> patientComboBox = new JComboBox<>();
@@ -1569,6 +1115,7 @@ public class Clinic implements ClinicInterface {
     }
   }
 
+  @Override
   public void deactivateStaffGUI() {
     // Select a clinical staff member to deactivate
     JComboBox<String> staffComboBox = new JComboBox<>();
@@ -1597,14 +1144,251 @@ public class Clinic implements ClinicInterface {
     String selectedStaffDisplay = (String) staffComboBox.getSelectedItem();
     ClinicalStaff selectedStaff = staffMap.get(selectedStaffDisplay);
 
-    // Iterate through all patients and remove the staff member from their assigned staff list
+    // Iterate through all patients and unassign the staff member using the unassignClinicalStaff method
     for (Patient patient : getAllPatients()) {
-      patient.getAssignedClinicalStaff().removeIf(staff -> staff.equals(selectedStaff));
+      if (patient.getAssignedClinicalStaff().contains(selectedStaff)) {
+        patient.unassignClinicalStaff(selectedStaff);
+      }
     }
 
     // Deactivate the staff member
     selectedStaff.setDeactivated(true);
+
     JOptionPane.showMessageDialog(null, "Clinical staff member " + selectedStaffDisplay + " deactivated successfully.", "Deactivated", JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  @Override
+  public void showPatientDetailsGUI() {
+    // Initialize the patient selection combo box
+    JComboBox<Patient> patientComboBox = new JComboBox<>();
+    List<Patient> allPatients = getAllPatients(); // Retrieve all patients
+    if (allPatients.isEmpty()) {
+      JOptionPane.showMessageDialog(null, "There are no patients available.", "No Patients", JOptionPane.INFORMATION_MESSAGE);
+      return;
+    }
+
+    // Add only active patients to the combo box
+    allPatients.stream()
+        .filter(patient -> !patient.isDeactivated())
+        .forEach(patientComboBox::addItem);
+
+    // Show a message if there are no active patients
+    if (patientComboBox.getItemCount() == 0) {
+      JOptionPane.showMessageDialog(null, "There are no active patients available.", "No Active Patients", JOptionPane.INFORMATION_MESSAGE);
+      return;
+    }
+
+    // Show the combo box in a confirm dialog
+    int patientChoice = JOptionPane.showConfirmDialog(null, patientComboBox, "Select an Active Patient", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+    if (patientChoice != JOptionPane.OK_OPTION) return; // User cancelled or closed the dialog
+
+    // Retrieve the selected patient and display their full information
+    Patient selectedPatient = (Patient) patientComboBox.getSelectedItem();
+    String patientDetails = selectedPatient.getFullInformation();
+    JOptionPane.showMessageDialog(null, patientDetails, "Patient Details", JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  @Override
+  public void unassignStaffFromPatientGUI() {
+    // Select a patient
+    JComboBox<Patient> patientComboBox = new JComboBox<>();
+    List<Patient> allPatients = getAllPatients();  // Retrieve all patients
+    if (allPatients.isEmpty()) {
+      JOptionPane.showMessageDialog(null, "There are no patients available.", "No Patients", JOptionPane.INFORMATION_MESSAGE);
+      return;
+    }
+    allPatients.forEach(patientComboBox::addItem);
+
+    int patientChoice = JOptionPane.showConfirmDialog(null, patientComboBox, "Select a Patient", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+    if (patientChoice != JOptionPane.OK_OPTION) return;
+
+    Patient selectedPatient = patientComboBox.getItemAt(patientComboBox.getSelectedIndex());
+
+    // Show patient information including assigned clinical staff
+    JOptionPane.showMessageDialog(null, selectedPatient.getFullInformation(), "Patient Information", JOptionPane.INFORMATION_MESSAGE);
+
+    // Select clinical staff to unassign
+    JComboBox<String> staffComboBox = new JComboBox<>();
+    Map<String, ClinicalStaff> staffMap = new HashMap<>();
+    for (ClinicalStaff staff : selectedPatient.getAssignedClinicalStaff()) {
+      String staffDisplay = staff.getPrefix() + staff.getFullName();
+      staffComboBox.addItem(staffDisplay);
+      staffMap.put(staffDisplay, staff);
+    }
+
+    if (staffComboBox.getItemCount() == 0) {
+      JOptionPane.showMessageDialog(null, "This patient has no assigned clinical staff to unassign.", "No Assignments", JOptionPane.INFORMATION_MESSAGE);
+      return;
+    }
+
+    int staffChoice = JOptionPane.showConfirmDialog(null, staffComboBox, "Select Clinical Staff to Unassign", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+    if (staffChoice != JOptionPane.OK_OPTION) return;
+
+    String selectedStaffDisplay = (String) staffComboBox.getSelectedItem();
+    ClinicalStaff selectedStaff = staffMap.get(selectedStaffDisplay);
+
+    // Confirmation dialog
+    int confirmation = JOptionPane.showConfirmDialog(
+        null,
+        "Are you sure you want to unassign " + selectedStaffDisplay + " from " + selectedPatient.getFullName() + "?",
+        "Confirmation",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.QUESTION_MESSAGE
+    );
+    if (confirmation != JOptionPane.YES_OPTION) return;
+
+    // Unassign the selected staff from the selected patient
+    selectedPatient.unassignClinicalStaff(selectedStaff);
+    selectedStaff.getAssignedPatients().remove(selectedPatient);
+
+    // Show updated patient information
+    JOptionPane.showMessageDialog(null, selectedPatient.getFullInformation(), "Updated Patient Information", JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  @Override
+  public void listClinicalStaffAndPatientCountsGUI() {
+    // Create column names for the JTable
+    String[] columnNames = {"Name", "Serial Number", "Unique Patients Assigned", "Status"};
+
+    // Retrieve the clinical staff list
+    List<ClinicalStaff> clinicalStaffList = getClinicalStaffList();  // Assuming this method returns all clinical staff members
+
+    // Create a two-dimensional Object array to hold the table data
+    Object[][] data = new Object[clinicalStaffList.size()][4];
+
+    // Fill the data array with clinical staff information
+    int i = 0;
+    for (ClinicalStaff clinicalStaff : clinicalStaffList) {
+      data[i][0] = clinicalStaff.getFullName();
+      data[i][1] = clinicalStaff.getSerialNumber();
+      data[i][2] = clinicalStaff.getUniquePatientCount();
+      data[i][3] = clinicalStaff.isDeactivated() ? "Inactive" : "Active";
+      i++;
+    }
+
+    // Create a JTable to display the clinical staff and their patient counts
+    JTable table = new JTable(data, columnNames);
+    table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+    table.setFillsViewportHeight(true);
+
+    // Create a scroll pane to make the table scrollable
+    JScrollPane scrollPane = new JScrollPane(table);
+
+    // Create and display a dialog containing the table
+    JOptionPane.showMessageDialog(null, scrollPane, "Clinical Staff and Their Patient Assignment Counts", JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  @Override
+  public void listInactivePatientsForYearGUI() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Listing patients with last visit record more than a year ago:\n");
+    boolean foundInactivePatient = false;
+
+    // Assuming getAllPatients retrieves all patients, including deactivated ones
+    List<Patient> allPatients = getAllPatients();
+
+    for (Patient patient : allPatients) {
+      List<Visitrecord> visitRecords = patient.getVisitRecords();
+      if (!visitRecords.isEmpty()) {
+        Visitrecord lastVisit = visitRecords.get(visitRecords.size() - 1);
+        long daysSinceLastVisit = ChronoUnit.DAYS.between(lastVisit.getRegistrationDateTime().toLocalDate(), LocalDate.now());
+
+        if (daysSinceLastVisit > 365) {
+          foundInactivePatient = true;
+          sb.append("Patient Serial Number: ").append(patient.getSerialNumber())
+              .append(", Name: ").append(patient.getFullName())
+              .append(", Last Visit Date: ").append(lastVisit.getRegistrationDateTime().toLocalDate())
+              .append("\n");
+        }
+      }
+    }
+
+    if (!foundInactivePatient) {
+      sb.append("No patients found with last visit record more than a year ago.");
+    }
+
+    JTextArea textArea = new JTextArea(sb.toString());
+    textArea.setEditable(false);
+    JScrollPane scrollPane = new JScrollPane(textArea);
+    scrollPane.setPreferredSize(new Dimension(500, 300));
+    JOptionPane.showMessageDialog(null, scrollPane, "Patients with Last Visit Over a Year Ago", JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  @Override
+  public void listClinicalStaffWithIncompleteVisitsGUI(List<ClinicalStaff> clinicalStaffList, GuiController guiController) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Clinical Staff with Active Patients and Incomplete Visits:\n");
+    for (ClinicalStaff clinicalStaff : clinicalStaffList) {
+      if (!clinicalStaff.isDeactivated()) {
+        List<Patient> assignedPatients = clinicalStaff.getAssignedPatients();
+        boolean hasIncompleteVisit = false;
+        for (Patient patient : assignedPatients) {
+          // Check if the patient has at least one active visit
+          List<Visitrecord> visitRecords = patient.getVisitRecords();
+          if (!visitRecords.isEmpty()) {
+            Visitrecord lastVisit = visitRecords.get(visitRecords.size() - 1);
+            if (!patient.isDeactivated() && lastVisit.isLastVisitWithinAYear()) {
+              hasIncompleteVisit = true;
+              break;
+            }
+          }
+        }
+        if (hasIncompleteVisit) {
+          sb.append("Name: ").append(clinicalStaff.getFullName()).append("\n");
+          sb.append("Job Title: ").append(clinicalStaff.getJobTitle()).append("\n");
+          sb.append("Currently Assigned Patients with Incomplete Visits:\n");
+          for (Patient patient : assignedPatients) {
+            List<Visitrecord> visitRecords = patient.getVisitRecords();
+            if (!visitRecords.isEmpty()) {
+              Visitrecord lastVisit = visitRecords.get(visitRecords.size() - 1);
+              if (!patient.isDeactivated() && lastVisit.isLastVisitWithinAYear()) {
+                sb.append("- ").append(patient.getFullName()).append("\n");
+              }
+            }
+          }
+          sb.append("--------------------------\n");
+        }
+      }
+    }
+
+    // Display the information in a JOptionPane dialog
+    JTextArea textArea = new JTextArea(sb.toString());
+    textArea.setEditable(false);
+    JScrollPane scrollPane = new JScrollPane(textArea);
+    JOptionPane.showMessageDialog(guiController.frame, scrollPane, "Clinical Staff with Incomplete Visits", JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  @Override
+  public void listPatientsWithMultipleVisitsInLastYear(GuiController guiController) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Patients with two or more visits in the past 365 days:\n");
+    LocalDate oneYearAgo = LocalDate.now().minusDays(365);
+
+    for (Patient patient : getAllPatients()) {
+      int recentVisitCount = 0;
+
+      for (Visitrecord visitRecord : patient.getVisitRecords()) {
+        if (visitRecord.getRegistrationDateTime().toLocalDate().isAfter(oneYearAgo)) {
+          recentVisitCount++;
+        }
+      }
+
+      if (recentVisitCount >= 2) {
+        sb.append("Patient: ")
+            .append(patient.getFullName())
+            .append(" - Serial Number: ")
+            .append(patient.getSerialNumber())
+            .append(" - Number of Visits in Last Year: ")
+            .append(recentVisitCount)
+            .append("\n");
+      }
+    }
+
+    // Display the information in a JOptionPane dialog
+    JTextArea textArea = new JTextArea(sb.toString());
+    textArea.setEditable(false);
+    JScrollPane scrollPane = new JScrollPane(textArea);
+    JOptionPane.showMessageDialog(guiController.frame, scrollPane, "Patients with Multiple Visits in Last Year", JOptionPane.INFORMATION_MESSAGE);
   }
 }
 

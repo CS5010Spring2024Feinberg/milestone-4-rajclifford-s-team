@@ -615,6 +615,22 @@ public class Patient implements PatientInterface {
     }
   }
 
+  /**
+   * Unassigns a clinical staff member from this patient.
+   *
+   * @param clinicalStaff The clinical staff to be unassigned.
+   */
+  public void unassignClinicalStaff(ClinicalStaff clinicalStaff) {
+    if (clinicalStaff == null) {
+      throw new IllegalArgumentException("Clinical staff cannot be null.");
+    }
+    if (assignedClinicalStaff.contains(clinicalStaff)) {
+      assignedClinicalStaff.remove(clinicalStaff);
+      // If there's any additional logic that needs to be executed when a clinical staff
+      // member is unassigned, it should be added here.
+    }
+  }
+
   @Override
   public String toString() {
     return firstName + " " + lastName + " - DOB: " + dateOfBirth;

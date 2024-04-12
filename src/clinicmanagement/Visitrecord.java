@@ -1,5 +1,6 @@
 package clinicmanagement;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Visitrecord {
@@ -46,5 +47,12 @@ public class Visitrecord {
         "Registration DateTime: " + registrationDateTime +
         ", Chief Complaint: '" + chiefComplaint + '\'' +
         ", Body Temperature: " + String.format("%.1f", bodyTemperature) + "°C";
+  }
+
+  // Private method to check if the last visit occurred within the last year
+  public boolean isLastVisitWithinAYear() {
+    LocalDateTime lastVisitDateTime = getRegistrationDateTime();
+    LocalDate oneYearAgo = LocalDate.now().minusYears(1);
+    return lastVisitDateTime.toLocalDate().isAfter(oneYearAgo) || lastVisitDateTime.toLocalDate().isEqual(oneYearAgo);
   }
 }

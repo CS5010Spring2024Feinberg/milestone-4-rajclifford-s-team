@@ -4,22 +4,20 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class GuiController {
 
   protected Clinic clinic;
   protected JFrame frame;
   protected JLabel clinicMapLabel;
+  private Map<Integer, Runnable> commands;
 
   public GuiController(Clinic clinic) {
     this.clinic = clinic;
+    this.commands = new HashMap<>();
+    initializeCommands();
     initializeGui();
   }
 
@@ -45,66 +43,59 @@ public class GuiController {
     frame.add(welcomeLabel, BorderLayout.NORTH);
   }
 
+  private void initializeCommands() {
+    commands.put(1, () -> clinic.registerNewPatientGUI(this));
+    commands.put(2, () -> clinic.assignPatientToRoomGUI(this));
+    commands.put(3, () -> clinic.addVisitRecordGUI(this));
+    commands.put(4, () -> clinic.registerNewClinicalStaff(this));
+    commands.put(5, () -> clinic.assignStaffToPatientGUI());
+    commands.put(6, () -> clinic.sendPatientHomeGUI(this));
+    commands.put(7, () -> clinic.deactivateStaffGUI());
+    commands.put(8, () -> clinic.showPatientDetailsGUI());
+    commands.put(9, () -> clinic.unassignStaffFromPatientGUI());
+    commands.put(10, () -> clinic.listClinicalStaffAndPatientCountsGUI());
+    commands.put(11, () -> clinic.listInactivePatientsForYearGUI());
+    commands.put(12, () -> clinic.listClinicalStaffWithIncompleteVisitsGUI(clinic.getClinicalStaffList(), this));
+    commands.put(13, () -> clinic.listPatientsWithMultipleVisitsInLastYear(this));
+    commands.put(14, () -> System.exit(0));
+  }
+
   private void createMenuBar() {
     JMenuBar menuBar = new JMenuBar();
-    menuBar.setBackground(Color.WHITE);
-    Font menuFont = new Font("Arial", Font.BOLD, 14);
-
     JMenu fileMenu = new JMenu("Clinic Menu");
-    fileMenu.setFont(menuFont);
+    fileMenu.setFont(new Font("Arial", Font.BOLD, 14));
 
-    // Register New Patient menu item
-    JMenuItem registerPatientMenuItem = new JMenuItem("Register New Patient");
-    registerPatientMenuItem.setFont(menuFont);
-    registerPatientMenuItem.addActionListener(e -> clinic.registerNewPatientGUI(this));
-    fileMenu.add(registerPatientMenuItem);
-
-    // Assign Patient to Room menu item
-    JMenuItem assignPatientMenuItem = new JMenuItem("Assign Patient to Room");
-    assignPatientMenuItem.setFont(menuFont);
-    assignPatientMenuItem.addActionListener(e -> clinic.assignPatientToRoomGUI(this));
-    fileMenu.add(assignPatientMenuItem);
-
-    // Add Visitor Record menu item
-    JMenuItem addVisitorRecordMenuItem = new JMenuItem("Add Visit Record");
-    addVisitorRecordMenuItem.setFont(menuFont);
-    addVisitorRecordMenuItem.addActionListener(e -> clinic.addVisitRecordGUI(this));
-    fileMenu.add(addVisitorRecordMenuItem);
-
-    JMenuItem addClinicalStaffMenuItem = new JMenuItem("Add Clinical Staff");
-    addVisitorRecordMenuItem.setFont(menuFont);
-    addClinicalStaffMenuItem.addActionListener(e -> clinic.registerNewClinicalStaff(this));
-    fileMenu.add(addClinicalStaffMenuItem);
-
-    // Add Assign Clinical Staff to Patient menu item
-    JMenuItem assignStaffToPatientMenuItem = new JMenuItem("Assign Clinical Staff to Patient");
-    assignStaffToPatientMenuItem.setFont(menuFont);
-    assignStaffToPatientMenuItem.addActionListener(e -> clinic.assignStaffToPatientGUI()); // Add action listener here
-    fileMenu.add(assignStaffToPatientMenuItem);
-
-    JMenuItem sendPatientHomeMenuItem = new JMenuItem("Send Patient Home");
-    sendPatientHomeMenuItem.setFont(menuFont);
-    sendPatientHomeMenuItem.addActionListener(e -> clinic.sendPatientHomeGUI(this));
-    fileMenu.add(sendPatientHomeMenuItem);
-
-    JMenuItem deactivateStaffMenuItem = new JMenuItem("Deactivate Staff");
-    deactivateStaffMenuItem.setFont(menuFont);
-    deactivateStaffMenuItem.addActionListener(e -> clinic.deactivateStaffGUI());
-    fileMenu.add(deactivateStaffMenuItem);
-
-    JMenuItem showPatientDetailsMenuItem = new JMenuItem("Show Patient Details");
-    showPatientDetailsMenuItem.setFont(new Font("Arial", Font.BOLD, 14));
-    showPatientDetailsMenuItem.addActionListener(e -> showPatientDetailsGUI());
-    fileMenu.add(showPatientDetailsMenuItem);
-
-
-    JMenuItem exitMenuItem = new JMenuItem("Exit");
-    exitMenuItem.setFont(menuFont);
-    exitMenuItem.addActionListener(e -> System.exit(0));
-    fileMenu.add(exitMenuItem);
+    addMenuItem(fileMenu, "Register New Patient", 1);
+    addMenuItem(fileMenu, "Assign Patient to Room", 2);
+    addMenuItem(fileMenu, "Add Visit Record", 3);
+    addMenuItem(fileMenu, "Add Clinical Staff", 4);
+    addMenuItem(fileMenu, "Assign Clinical Staff to Patient", 5);
+    addMenuItem(fileMenu, "Send Patient Home", 6);
+    addMenuItem(fileMenu, "Deactivate Staff", 7);
+    addMenuItem(fileMenu, "Show Patient Details", 8);
+    addMenuItem(fileMenu, "Unassign Clinical Staff from Patient", 9);
+    addMenuItem(fileMenu, "List Clinical Staff and Patient Counts", 10);
+    addMenuItem(fileMenu, "List Inactive Patients for Over a Year", 11);
+    addMenuItem(fileMenu, "List Clinical Staff with Incomplete Visit", 12);
+    addMenuItem(fileMenu, "List Patients with Multiple Visits in Last Year", 13);
+    addMenuItem(fileMenu, "Exit", 14);
 
     menuBar.add(fileMenu);
     frame.setJMenuBar(menuBar);
+  }
+
+  private void addMenuItem(JMenu menu, String title, int commandKey) {
+    JMenuItem menuItem = new JMenuItem(title);
+    menuItem.addActionListener(e -> executeCommand(commands.get(commandKey)));
+    menu.add(menuItem);
+  }
+
+  private void executeCommand(Runnable command) {
+    try {
+      command.run();
+    } catch (Exception ex) {
+      JOptionPane.showMessageDialog(frame, "Error occurred: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   private void displayClinicMap() {
@@ -127,45 +118,6 @@ public class GuiController {
   }
 
   public void updateClinicMap() {
-    SwingUtilities.invokeLater(() -> {
-      updateMapImage();
-      frame.revalidate();
-      frame.repaint();
-    });
-
-
+    SwingUtilities.invokeLater(this::updateMapImage);
   }
-  public void showPatientDetailsGUI() {
-    // Initialize the patient selection combo box
-    JComboBox<Patient> patientComboBox = new JComboBox<>();
-    List<Patient> allPatients = clinic.getAllPatients(); // Retrieve all patients
-    if (allPatients.isEmpty()) {
-      JOptionPane.showMessageDialog(null, "There are no patients available.", "No Patients", JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-
-    // Add only active patients to the combo box
-    allPatients.stream()
-        .filter(patient -> !patient.isDeactivated())
-        .forEach(patientComboBox::addItem);
-
-    // Show a message if there are no active patients
-    if (patientComboBox.getItemCount() == 0) {
-      JOptionPane.showMessageDialog(null, "There are no active patients available.", "No Active Patients", JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-
-    // Show the combo box in a confirm dialog
-    int patientChoice = JOptionPane.showConfirmDialog(null, patientComboBox, "Select an Active Patient", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-    if (patientChoice != JOptionPane.OK_OPTION) return; // User cancelled or closed the dialog
-
-    // Retrieve the selected patient and display their full information
-    Patient selectedPatient = (Patient) patientComboBox.getSelectedItem();
-    String patientDetails = selectedPatient.getFullInformation();
-    JOptionPane.showMessageDialog(null, patientDetails, "Patient Details", JOptionPane.INFORMATION_MESSAGE);
-  }
-
-
-
-
 }

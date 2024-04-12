@@ -1,5 +1,6 @@
 package clinicmanagement;
 
+import javax.swing.*;
 import java.util.List;
 import java.util.Scanner;
 
@@ -52,6 +53,8 @@ public interface ClinicInterface {
    * @param patient The patient to add.
    */
   void addPatient(Patient patient);
+
+  void assignClinicalStaffToPatient(Patient patientToStaff, ClinicalStaff clinicalStaffMember);
 
   /**
    * Assigns a patient to a specific room.
@@ -131,12 +134,9 @@ public interface ClinicInterface {
   void displayAvailableRooms();
 
 
+  List<ClinicalStaff> getClinicalStaffList();
 
-
-  /**
-   * Prints the list of all staff members.
-   */
-  void printStaffList();
+  void showClinicalStaffList(JFrame frame);
 
   /**
    * Checks if a room is occupied.
@@ -147,17 +147,14 @@ public interface ClinicInterface {
   boolean isRoomOccupied(String roomName);
 
   /**
-   * Prints the list of rooms in the clinic.
-   */
-  void printRoomList();
-
-  /**
    * Gets a room by its room number.
    *
    * @param roomNumber The room number to search for.
    * @return The room with the specified room number, or null if not found.
    */
   Room getRoomByNumber(int roomNumber);
+
+  List<Room> getRooms();
 
   /**
    * Registers a new clinical staff member.
@@ -204,35 +201,6 @@ public interface ClinicInterface {
    */
 
   /**
-   * Unassigns clinical staff from a patient.
-   *
-   * @param sc The Scanner object to use for user input.
-   * @return True if the unassignment was successful, false otherwise.
-   */
-  boolean unassignClinicalStaffFromPatient(Scanner sc);
-
-  /**
-   * Lists clinical staff and patient counts.
-   */
-  void listClinicalStaffAndPatientCounts();
-
-  /**
-   * Lists inactive patients for the year.
-   */
-  void listInactivePatientsForYear();
-
-  /**
-   * Lists patients with multiple visits in the last year.
-   */
-  void listPatientsWithMultipleVisitsInLastYear();
-
-  /**
-   * Lists staffs with multiple visits in the last year.
-   * @param sc user input
-   */
-  void displayPatientStaff(Scanner sc);
-
-  /**
    * Finds a patient in the existing clinic directory.
    * @param newPatient as input to match with exisitng patient.
    * @return the existing patient
@@ -240,4 +208,30 @@ public interface ClinicInterface {
   Patient findExistingPatient(Patient newPatient);
 
   List<Patient> getAllPatients() throws IllegalArgumentException;
+
+  void registerNewPatientGUI(GuiController guiController);
+
+  void assignPatientToRoomGUI(GuiController guiController);
+
+  void addVisitRecordGUI(GuiController guiController);
+
+  void registerNewClinicalStaff(GuiController guiController);
+
+  void assignStaffToPatientGUI();
+
+  void sendPatientHomeGUI(GuiController guiController);
+
+  void deactivateStaffGUI();
+
+  void showPatientDetailsGUI();
+
+  void unassignStaffFromPatientGUI();
+
+  void listClinicalStaffAndPatientCountsGUI();
+
+  void listInactivePatientsForYearGUI();
+
+  void listClinicalStaffWithIncompleteVisitsGUI(List<ClinicalStaff> clinicalStaffList, GuiController guiController);
+
+  void listPatientsWithMultipleVisitsInLastYear(GuiController guiController);
 }
