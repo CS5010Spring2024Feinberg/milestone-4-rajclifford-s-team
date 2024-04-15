@@ -53,6 +53,11 @@ public interface ClinicInterface {
    */
   void addPatient(Patient patient);
 
+  /**
+   * Assign a patient to clinical staff.
+   * @param clinicalStaffMember Clinical Staff to assign.
+   * @param patientToStaff Patient to be assigned.
+   */
   void assignClinicalStaffToPatient(Patient patientToStaff, ClinicalStaff clinicalStaffMember);
 
   /**
@@ -99,11 +104,6 @@ public interface ClinicInterface {
   boolean isPatientInExamOrProcedureRoom(Patient patient);
 
   /**
-   * Displays the seating chart of the clinic.
-   */
-  void displaySeatingChart();
-
-  /**
    * Checks if a patient is a duplicate entry.
    *
    * @param newPatient The new patient to check.
@@ -127,14 +127,18 @@ public interface ClinicInterface {
    */
   Room getPatientCurrentRoom(Patient patient);
 
+
   /**
-   * Displays the available rooms in the clinic.
+   * Lists all Clinical Staff in the clinic instance.
+   * @return All Clinical Staff
+   *
    */
-  void displayAvailableRooms();
-
-
   List<ClinicalStaff> getClinicalStaffList();
 
+  /**
+   * Shows clinical Staff list in gui table.
+   * @param frame J panel
+   */
   void showClinicalStaffList(JFrame frame);
 
   /**
@@ -153,6 +157,11 @@ public interface ClinicInterface {
    */
   Room getRoomByNumber(int roomNumber);
 
+  /**
+   * Shows the list of rooms in the clinic.
+   * @return list of rooms.
+   *
+   */
   List<Room> getRooms();
 
   /**
@@ -162,6 +171,10 @@ public interface ClinicInterface {
    */
   void registerNewClinicalStaff(ClinicalStaff staffMember);
 
+  /**
+   * Register new Clinical Staff in the clinic.
+   * @param guiController controller input
+   */
   void registerNewClinicalStaff(GuiController guiController);
 
   /**
@@ -171,19 +184,6 @@ public interface ClinicInterface {
    * @param clinicalStaff  The clinical staff member overseeing the patient.
    */
   void sendPatientHome(Patient patient, ClinicalStaff clinicalStaff);
-
-  /**
-   * Lists all patients in the clinic.
-   */
-  void listAllPatients();
-
-  /**
-   * Finds a patient by their serial number.
-   *
-   * @param serialNumber The serial number of the patient to find.
-   * @return The found patient or null if not found.
-   */
-  Patient findPatientBySerialNumber(int serialNumber);
 
 
   /**

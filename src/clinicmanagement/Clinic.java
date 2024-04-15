@@ -465,32 +465,6 @@ public class Clinic implements ClinicInterface {
     return null; // Return null if the patient is not assigned to any room
   }
 
-  /**
-   * Displays a list of available rooms.
-   */
-  @Override
-  public void displayAvailableRooms() throws IllegalArgumentException {
-    // Validate parameter
-    if (rooms == null) {
-      throw new IllegalArgumentException("Rooms list cannot be null.");
-    }
-
-    System.out.println("Available Rooms:");
-    boolean hasAvailableRooms = false;
-    for (Room room : rooms) {
-      // Assuming isRoomOccupied checks if the room is currently not occupied
-      if (!isRoomOccupied(room.getName())) {
-        System.out.println("Room Number: " + room.getRoomNumber()
-            + " | Room Type: " + room.getType().getType()
-            + " | Room Name: " + room.getName());
-        hasAvailableRooms = true;
-      }
-    }
-    if (!hasAvailableRooms) {
-      System.out.println("No available rooms at the moment.");
-    }
-  }
-
   @Override
   public List<ClinicalStaff> getClinicalStaffList() {
     List<ClinicalStaff> clinicalStaffList = new ArrayList<>();
@@ -601,35 +575,6 @@ public class Clinic implements ClinicInterface {
     return false; // Patient is not in an exam or procedure room
   }
 
-  /**
-   * Displays a seating chart with room assignments, including assigned patients for each room.
-   */
-  @Override
-  public void displaySeatingChart() throws IllegalArgumentException {
-    // Validate parameter
-    if (rooms == null) {
-      throw new IllegalArgumentException("Rooms list cannot be null.");
-    }
-
-    for (Room room : rooms) {
-      System.out.println(room); // Utilize toString() method of Room class
-
-      // Get the assigned patients for the room
-      List<Patient> assignedPatients = getPatientsInRoom(room);
-
-      if (!assignedPatients.isEmpty()) {
-        System.out.println("Assigned Patient(s):");
-        for (Patient patient : assignedPatients) {
-          System.out.println("- " + patient.getFullName());
-        }
-      } else {
-        System.out.println("No patients assigned to this room.");
-      }
-
-      System.out.println("--------------------------");
-    }
-  }
-
 
   /**
    * Helper method to check for duplicate patients based on first name, last name, and DOB.
@@ -675,78 +620,6 @@ public class Clinic implements ClinicInterface {
     return null; // Return null if the patient is not assigned to any room
   }
 
-
-  /**
-   * Lists all registered patients along with their details such as
-   * serial number, name, date of birth, room number, room name, and room type.
-   * If no patients are registered, a message indicating the absence of
-   * registered patients is printed.
-   *
-   * @throws NullPointerException if any of the patients' fields
-   *              (serial number, name, date of birth, room number, room name, room type) are null
-   */
-  @Override
-  public void listAllPatients() throws IllegalArgumentException {
-    // Validate patients list
-    if (patients == null) {
-      throw new IllegalArgumentException("Patients list cannot be null.");
-    }
-
-    if (patients.isEmpty()) {
-      System.out.println("No patients are currently registered.");
-      return;
-    }
-
-    System.out.println("List of Registered Patients:");
-    System.out.println("Serial Number | Name | Date of Birth"
-        +
-        " | Room Number | Room Name | Room Type");
-    for (Patient patient : patients) {
-      if (patient.deactivated) {
-        continue;
-      }
-      // Assuming that getRoomNumber() returns an int.
-      // If it's Integer, it can be null, hence no need for null check.
-      String roomNumber = patient.getRoomNumber() > 0
-          ? String.valueOf(patient.getRoomNumber()) : "Not assigned";
-
-      // Assuming that getRoomName() and getRoomType() methods exist and return a String.
-      // If room name or type could be null, you might want to handle that with similar checks.
-      String roomName = patient.getRoomName() != null ? patient.getRoomName() : "Not assigned";
-      String roomType = patient.getRoomType() != null
-          ? patient.getRoomType().getType() : "Not assigned";
-
-      System.out.println(patient.getSerialNumber()
-          + " | " + patient.getFullName() + " | "
-          + patient.getDateOfBirth().format(DateTimeFormatter.ofPattern("M/d/yyyy"))
-          + " | " + roomNumber + " | " + roomName + " | " + roomType);
-    }
-  }
-
-  /**
-   *
-   * This method iterates through the list of patients and compares each
-   * patient's first name, last name,
-   * and date of birth with the provided parameters. The comparison of first
-   * name and last name is case-insensitive,
-   * while the date of birth must match exactly.
-   * @param serialNumber patient serial number
-   * @return patient object
-   */
-  @Override
-  public Patient findPatientBySerialNumber(int serialNumber)throws IllegalArgumentException {
-    // Validate patients list
-    if (patients == null) {
-      throw new IllegalArgumentException("Patients list cannot be null.");
-    }
-
-    for (Patient patient : patients) {
-      if (patient.getSerialNumber() == serialNumber) {
-        return patient;
-      }
-    }
-    return null; // No matching patient found
-  }
 
   /**
    * Finds and returns a staff member by their serial number.
