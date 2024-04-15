@@ -24,8 +24,15 @@ List all features that are present in your program.
 
 
 ### How to Run
+Jar file Milestone_4.jar is located in /res directory
+Steps:
 
-Describe how to run your program from the JAR file. Describe what arguments are needed (if any) and what they mean.
+Open Command Line or Terminal: Navigate to the command line or terminal on your computer.
+
+Navigate to the JAR File Location: Use the cd command to change directories to the location where your JAR file is stored. For example: cd path/to/your/jarfile
+
+3.Run the JAR File: To run the program, use the following command:java -jar Milestone-4.jar
+(no arguments needed)
 
 
 
