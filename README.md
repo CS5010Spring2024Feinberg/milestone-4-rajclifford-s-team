@@ -71,7 +71,7 @@ Navigate to the JAR File Location: Use the cd command to change directories to t
 
 ### How to Use the Program
 
-Provide instructions on how to use the functionality in your program. If it is interactive, describe how to interact with your program. Pay particular attention to the parts that are not part of the example runs that you provide.
+Run the GUIDriver.java file as a Java application, and go through the menu and options displayed on the GUI as you so wish. You can perform any function in the manner described in the milestone 4 description.
 
 
 
