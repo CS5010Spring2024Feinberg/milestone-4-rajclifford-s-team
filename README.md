@@ -97,7 +97,7 @@ Mneu 13 : List Patients with Mutiple Visits in Last Year
 
 As the run is in GUI, it has been provided as a pdf file in /res file
 
-File Name: View and Run of Milestone4.pdf
+File Name: /res/MILESTONE 4 Design,View and Run.pdf
 
 ### Design/Model Changes
 
