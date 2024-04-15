@@ -18,8 +18,42 @@ The problem facing us is that we need to represent in code a clinic that has roo
 
 ### List of Features
 
-List all features that are present in your program.
+The clinic has the ability to:
 
+- Get and set its name
+- Add a room
+- Add a patient
+- Add a staff member
+- Register a new patient in the clinic, can be done through GUI
+- Get a room by its number
+- Get all the rooms
+- Register a new clinical staff member in the clinic
+- Send a patient home, can be done through GUI
+- Assign a clinical staff member to a patient, can be done through GUI
+- Assign a patient to a room, can be done through GUI
+- Get the patients in a room
+- Find a patient by name
+- Find a clinical staff member by name
+- Get a patient's room
+- Display available rooms
+- Get a list of clinical staff members
+- Show a list of clinical staff members on a GUI
+- Check if a room is occupied
+- Check if a patient is in an exam or procedure room
+- Display a seating chart of the rooms
+- Check for duplicate patients
+- Get the room of a patient
+- List all the patients with their information
+- Find a patient by serial number
+- Find a staff by serial number
+- Add a visit record on a GUI
+- Deactivate a staff member on a GUI
+- Show a patient's details on a GUI
+- Unassign a staff member from a patient on a GUI
+- List the clinical staff and patient counts on a GUI
+- List inactive patients for a year on a GUI
+- List clinical staff with incomplete visits on a GUI
+- List patients with multiple visits in past year on a GUI
 
 
 ### How to Run
