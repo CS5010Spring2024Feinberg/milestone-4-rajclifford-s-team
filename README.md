@@ -3,12 +3,13 @@
 This repo represents the coursework for CS 5010!
 
 **Name:** Rajorshi Sarkar
-          Cliford Yin
+          Clifford Yin
 
 **Email:** sarkar.r@northeastern.edu
+yin.cl@northeastern.edu
 
 **Preferred Name:** Raj
-
+Clifford
 
 
 ### About/Overview
