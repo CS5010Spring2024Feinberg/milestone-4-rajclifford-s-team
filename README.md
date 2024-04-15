@@ -115,14 +115,25 @@ The changes can be summarized as:
 
 ### Assumptions
 
-List any assumptions that you made during program development and implementations. Be sure that these do not conflict with the requirements of the project.
-
+1. The user need mandatorily upload a clinic file to start using the Clinic Managment System.
+2. The Rooms defined in the user file will be the concreate structure of the clinic and will not be modified or changed.
+3. The clinic would be only available during the runtime and would not be retrivable once the jar is closed.
+4. Non Clinical Staff has not been assigned any dedicated fucntion as no requirements were provided.
+5. There is not current requrement to re-activate clinical Staff.
+6. Serial numbers of Patient and Staff are both neumerical and should not be confused with each other.
+7. The color coding in the map is as per the room type and dimesions of the boxes are based on a scaled verision of the room coordinates. (they are fixed and limited to 3 types).
+8. The designation and titles of staff is also limited to the model designations and cannot be expanded by the user.
 
 
 ### Limitations
 
-1. The Clinic Managment System cannot add room or change the room layout
-2. The Clinic Managment System cannot handle 
+1. The Clinic Managment System cannot add room or change the room layout.
+2. Only First and Last Names can be handled for Staff and Patients.
+3. Visitation Record only had text (not images or media) as input.
+4. The Clinic Managment System cannot handle more than 1 clinic file(s).
+5. The Clinic Managment System does have the provition but not the option to reactivate Clinical Staff.
+6. We only can Accomodate 2 category of Staffs and 3 categories of Rooms which cannot be expanded.
+7. We cannot save the current state of the clinic in the memory or file.
 
 
 ### Citations
