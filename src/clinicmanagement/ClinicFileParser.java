@@ -24,22 +24,6 @@ public class ClinicFileParser implements ClinicFileParserInterface {
     this.reader = reader;
   }
 
-  /**
-   * Parses the name of the clinic from a BufferedReader and returns it.
-   *
-   * @param reader The BufferedReader containing the clinic name.
-   * @return The name of the clinic.
-   * @throws IOException if an I/O error occurs while reading from the reader.
-   * @throws IllegalArgumentException if the clinic name is empty.
-   */
-  public String parseClinicName(BufferedReader reader) throws IOException {
-    String name = reader.readLine().trim();
-    if (name.isEmpty()) {
-      throw new IllegalArgumentException("Clinic name cannot be empty.");
-    }
-    this.clinicName = name;
-    return clinicName;
-  }
 
   /**
    * Parse the clinic information from a file and create a Clinic object.
@@ -58,6 +42,24 @@ public class ClinicFileParser implements ClinicFileParserInterface {
     }
     return clinic;
   }
+
+  /**
+   * Parses the name of the clinic from a BufferedReader and returns it.
+   *
+   * @param reader The BufferedReader containing the clinic name.
+   * @return The name of the clinic.
+   * @throws IOException if an I/O error occurs while reading from the reader.
+   * @throws IllegalArgumentException if the clinic name is empty.
+   */
+  public String parseClinicName(BufferedReader reader) throws IOException {
+    String name = reader.readLine().trim();
+    if (name.isEmpty()) {
+      throw new IllegalArgumentException("Clinic name cannot be empty.");
+    }
+    this.clinicName = name;
+    return clinicName;
+  }
+
 
   /**
    * Parses the name of the clinic from a BufferedReader and sets it to the clinic object.
@@ -95,6 +97,8 @@ public class ClinicFileParser implements ClinicFileParserInterface {
     }
   }
 
+
+
   /**
    * Validates the format of a room name.
    *
@@ -110,6 +114,8 @@ public class ClinicFileParser implements ClinicFileParserInterface {
       throw new IllegalArgumentException("Invalid room name format: " + roomName);
     }
   }
+
+
 
   /**
    * Parses staff information from a BufferedReader and adds staff members to the clinic.

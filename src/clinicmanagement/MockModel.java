@@ -1,18 +1,15 @@
 package clinicmanagement;
 
 import java.awt.Dimension;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -25,7 +22,7 @@ import javax.swing.JTextField;
  * The {@code Clinic} class represents a medical clinic and manages its rooms,
  * patients, staff, and assignments.
  */
-public class Clinic implements ClinicInterface {
+public class MockModel extends Clinic {
   private String name;
   private final List<Room> rooms;
   private final List<Patient> patients;
@@ -37,7 +34,7 @@ public class Clinic implements ClinicInterface {
   /**
    * Constructs a new clinic with empty lists and maps for rooms, patients, staff, and assignments.
    **/
-  public Clinic() throws IllegalArgumentException {
+  public MockModel() throws IllegalArgumentException {
     rooms = new ArrayList<>();
     patients = new ArrayList<>();
     staff = new ArrayList<>();
@@ -49,6 +46,18 @@ public class Clinic implements ClinicInterface {
         waitingRoomAssignments == null || patientAssignments == null) {
       throw new IllegalArgumentException("Lists and maps cannot be null.");
     }
+  }
+
+  /**
+   * Clear data from the clinic.
+   */
+  public void clear() {
+    this.rooms.clear();
+    this.patients.clear();
+    this.staff.clear();
+    this.roomAssignments.clear();
+    this.waitingRoomAssignments.clear();
+    this.patientAssignments.clear();
   }
 
   /**
@@ -139,13 +148,16 @@ public class Clinic implements ClinicInterface {
         // Reactivate the existing patient
         existingPatient.setReactivated();
         // Update the existing patient's room information and add them to the room
-        Room room = getRoomByNumber(1); // Assuming logic to get the correct room number
+        Room room = getRoomByNumber(1);
+        // Assuming logic to get the correct room number
         if (room != null) {
           existingPatient.setRoomName(room.getName());
           existingPatient.setRoomType(room.getType());
-          room.getAssignedPatients().add(existingPatient); // Add the patient to the room's list
+          room.getAssignedPatients().add(existingPatient);
+          // Add the patient to the room's list
           JOptionPane.showMessageDialog(null,
-              "Duplicate patient found. Reactivated patient: " + existingPatient.getFullName());
+              "Duplicate patient found. Reactivated patient: "
+                  + existingPatient.getFullName());
           return existingPatient;
         } else {
           JOptionPane.showMessageDialog(null,
@@ -158,22 +170,15 @@ public class Clinic implements ClinicInterface {
       }
     } else {
       // Proceed with registering the new patient
-      Room room = getRoomByNumber(1); // Assuming logic to get the correct room number
+      Room room = getRoomByNumber(1);
+      // Assuming logic to get the correct room number
       if (room != null) {
         newPatient.setRoomName(room.getName());
         newPatient.setRoomType(room.getType());
         room.getAssignedPatients().add(newPatient); // Add the patient to the room's list
         patients.add(newPatient); // Also add the patient to the clinic's overall list
         roomAssignments.put(room, newPatient); // Update room assignments map
-        JOptionPane.showMessageDialog(null,
-            "Patient " + newPatient.getFullName()
-                + " registered successfully in room "
-                + room.getRoomNumber() + ": " + room.getName()
-                + " (Type: " + room.getType() + ")");
         return newPatient;
-      } else {
-        JOptionPane.showMessageDialog(null,
-            "Room with number " + 1 + " not found.");
       }
     }
     return null; // Return null if patient registration fails
@@ -230,11 +235,10 @@ public class Clinic implements ClinicInterface {
     // Check if the patient is already deactivated before attempting to deactivate
     if (patient.isDeactivated()) {
       LocalDate lastDeactivationDate = patient.getLastDeactivationDate();
-      throw new IllegalStateException("Patient "
-          + patient.getFullName() + " cannot be deactivated again,"
+      throw new IllegalStateException("Patient " + patient.getFullName()
+          + " cannot be deactivated again,"
           + " as they were already deactivated"
-          + (lastDeactivationDate != null ? " on "
-          + lastDeactivationDate : "") + ".");
+          + (lastDeactivationDate != null ? " on " + lastDeactivationDate : "") + ".");
     }
 
     patient.setDeactivated(true);
@@ -247,6 +251,7 @@ public class Clinic implements ClinicInterface {
     // Remove the patient from any room assignments
     if (rooms != null) {
       rooms.forEach(room -> room.getAssignedPatients().remove(patient));
+      rooms.forEach(room -> roomAssignments.remove(room, patient));
     }
 
     // Remove the patient from any clinical staff's list of assigned patients
@@ -265,33 +270,13 @@ public class Clinic implements ClinicInterface {
                                            ClinicalStaff clinicalStaffMember) {
     if (clinicalStaffMember != null && !clinicalStaffMember.isDeactivated()) {
       if (!clinicalStaffMember.getAssignedPatients().contains(patientToStaff)) {
-        patientToStaff.assignClinicalStaff(clinicalStaffMember);
-        // Use the new method
+        patientToStaff.assignClinicalStaff(clinicalStaffMember); // Use the new method
         clinicalStaffMember.getAssignedPatients().add(patientToStaff);
         // Assuming getAssignedPatients is mutable
-        clinicalStaffMember.assignPatientforCount(patientToStaff);
-        // Handle patient count
+        clinicalStaffMember.assignPatientforCount(patientToStaff); // Handle patient count
 
-        // GUI feedback
-        JOptionPane.showMessageDialog(null,
-            clinicalStaffMember.getPrefix()
-                + clinicalStaffMember.getFullName() + " has been added to "
-                + patientToStaff.getFullName() + "'s care team.",
-            "Assignment Successful", JOptionPane.INFORMATION_MESSAGE);
-      } else {
-        // GUI feedback for duplicate assignment
-        JOptionPane.showMessageDialog(null,
-            "Error: " + patientToStaff.getFullName()
-                + " is already assigned to " +  clinicalStaffMember.getPrefix()
-                + clinicalStaffMember.getFullName() + ".", "Assignment Error",
-            JOptionPane.ERROR_MESSAGE);
+
       }
-    } else {
-      // GUI feedback for invalid staff member or already assigned member
-      JOptionPane.showMessageDialog(null, "Error:"
-              +
-          " Cannot assign deactivated staff.", "Assignment Error",
-          JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -319,33 +304,9 @@ public class Clinic implements ClinicInterface {
         .findFirst()
         .orElse(null);
 
-    if (roomToAssign == null) {
-      JOptionPane.showMessageDialog(null,
-          "Error: Room with name '" + roomName + "' not found.");
-      return;
-    }
-
-    if (isRoomOccupied(roomName) && !roomToAssign.isWaitingRoom()) {
-      JOptionPane.showMessageDialog(null,
-          "Error: The selected room is already occupied by another patient.");
-      return;
-    }
-
-    if (isPatientInExamOrProcedureRoom(patient) && roomToAssign.isWaitingRoom()) {
-      JOptionPane.showMessageDialog(null,
-          "Error: Patient is already in an Exam or "
-              +
-              "Procedure Room and cannot be assigned to a Waiting Room.");
-      return;
-    }
-
     // Remove the patient from their current room's assigned patient list
     Room currentRoom = getPatientCurrentRoom(patient);
-    if (currentRoom != null && currentRoom.getName().equalsIgnoreCase(roomName)) {
-      JOptionPane.showMessageDialog(null,
-          "Error: Patient is already assigned to the specified room.");
-      return;
-    }
+
     if (currentRoom != null) {
       currentRoom.getAssignedPatients().remove(patient);
     }
@@ -358,9 +319,6 @@ public class Clinic implements ClinicInterface {
     patient.setRoomName(roomName);
     patient.setRoomType(roomToAssign.getType());
 
-
-    JOptionPane.showMessageDialog(null, "Patient "
-        + patient.getFullName() + " assigned to room: " + roomName);
   }
 
   /**
@@ -394,8 +352,7 @@ public class Clinic implements ClinicInterface {
    *
    * @param firstName The first name of the patient to search for.
    * @param lastName  The last name of the patient to search for.
-   * @return The patient with the specified first name and last name,
-   *        or null if not found.
+   * @return The patient with the specified first name and last name, or null if not found.
    */
   @Override
   public Patient findPatientByName(String firstName, String lastName)
@@ -457,8 +414,8 @@ public class Clinic implements ClinicInterface {
       // Check if the patient is in the list of assigned patients for each room
       for (Patient assignedPatient : room.getAssignedPatients()) {
         if (assignedPatient.equals(patient)) {
-          return room;
-          // Return the room if the patient is found in its assigned patients list
+          return room; // Return the room if the patient
+          // is found in its assigned patients list
         }
       }
     }
@@ -520,16 +477,16 @@ public class Clinic implements ClinicInterface {
         if (!clinicalStaff.isDeactivated()) {
           String prefix = clinicalStaff.getPrefix();
           // getPrefix method should exist in ClinicalStaff
-          staffListBuilder.append("Serial Number: ")
-              .append(clinicalStaff.getSerialNumber()).append("<br>");
+          staffListBuilder.append("Serial Number: ").append(clinicalStaff
+              .getSerialNumber()).append("<br>");
           staffListBuilder.append("Name: ").append(prefix).append(" ")
               .append(clinicalStaff.getFullName()).append("<br>");
           staffListBuilder.append("Job Title: ").append(clinicalStaff
               .getJobTitle()).append("<br>");
           staffListBuilder.append("Education Level: ").append(clinicalStaff
               .getEducationLevel()).append("<br>");
-          staffListBuilder.append("Unique Identifier (NPI): ").append(clinicalStaff
-              .getNpi()).append("<br>");
+          staffListBuilder.append("Unique Identifier (NPI): ")
+              .append(clinicalStaff.getNpi()).append("<br>");
           staffListBuilder.append("--------------------------<br>");
         }
       }
@@ -556,8 +513,9 @@ public class Clinic implements ClinicInterface {
     for (Room room : rooms) {
       if (room.getName().equalsIgnoreCase(roomName)) {
         // Directly check if the room is of type PROCEDURE or EXAM
-        if (room.getType() == Room.RoomType.PROCEDURE || room.getType() == Room.RoomType
-            .EXAM) {
+        if (room.getType() == Room.RoomType.PROCEDURE || room.getType()
+            == Room.RoomType.EXAM) {
+          System.out.println(room.getAssignedPatients().get(0).getFirstName());
           // The room is considered occupied if there are any patients assigned to it
           return !room.getAssignedPatients().isEmpty();
         }
@@ -566,8 +524,7 @@ public class Clinic implements ClinicInterface {
         return false;
       }
     }
-    // If no room with the given name is found, or it's
-    // not a PROCEDURE or EXAM room, return false
+    // If no room with the given name is found, or it's not a PROCEDURE or EXAM room, return false
     return false;
   }
 
@@ -578,8 +535,7 @@ public class Clinic implements ClinicInterface {
    * @return true if the patient is in an exam or procedure room, false otherwise.
    */
   @Override
-  public boolean isPatientInExamOrProcedureRoom(Patient patient)
-      throws IllegalArgumentException {
+  public boolean isPatientInExamOrProcedureRoom(Patient patient) throws IllegalArgumentException {
     // Validate parameters
     if (roomAssignments == null) {
       throw new IllegalArgumentException("Room assignments map cannot be null.");
@@ -657,15 +613,20 @@ public class Clinic implements ClinicInterface {
   /**
    * Gets the assigned room for a patient.
    *
-   * @param patient The patient whose assigned room is to be retrieved.
+   * @param first name of patient
+   * @param last name o f patient
+   * @param dob date of birth
    * @return The assigned room for the patient, or null if not assigned to any room.
    */
-  @Override
-  public Room getAssignedRoomForPatient(Patient patient) throws IllegalArgumentException {
+  public Room getAssignedRoomForPatient(String first, String last, String dob)
+      throws IllegalArgumentException {
     // Validate parameter
-    if (patient == null) {
+    if (first == null || last == null || dob == null || first.isEmpty()
+        || last.isEmpty() || dob.isEmpty()) {
       throw new IllegalArgumentException("Patient cannot be null.");
     }
+
+    Patient patient = new Patient(0, first, last, dob);
 
     for (Map.Entry<Room, Patient> entry : roomAssignments.entrySet()) {
       if (entry.getValue().equals(patient)) {
@@ -794,7 +755,7 @@ public class Clinic implements ClinicInterface {
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    Clinic clinic = (Clinic) obj;
+    MockModel clinic = (MockModel) obj;
     return Objects.equals(name, clinic.name)
         &&
         Objects.equals(rooms, clinic.rooms)
@@ -838,10 +799,10 @@ public class Clinic implements ClinicInterface {
   }
 
   /**
-   * Retrieves a list of all active patients.
+   * Retrieves a list of all active patients in the clinic for Mock Test.
    *
-   * @return List of active Patient objects.
-   * @throws IllegalArgumentException if the patients list is null.
+   * @return A list containing all active patients.
+   * @throws IllegalArgumentException If the patients list is null.
    */
   @Override
   public List<Patient> getAllPatients() throws IllegalArgumentException {
@@ -861,148 +822,86 @@ public class Clinic implements ClinicInterface {
 
 
   /**
-   * Displays a GUI dialog to register a new patient and adds them to the clinic.
+   * Registers a new patient using the provided information from the GUI.
+   * This method creates text fields for entering the patient's first name,
+   * last name, and date of birth (in the format "M/d/yyyy"). It then extracts
+   * the entered information from the text fields, parses the date of birth
+   * string into a LocalDate object, and creates a new Patient instance with
+   * the provided information. Finally, it invokes the registerNewPatient()
+   * method of the associated Clinic object to register the new patient.
    *
-   * @param guiController The GUI controller object.
+   * @param guiController The MockView instance representing the GUI controller.
+   * @param mockFirstName The mock first name to prefill in the first name field.
+   * @param mockLastName The mock last name to prefill in the last name field.
+   * @param mockdob The mock date of birth to prefill in the date of birth field.
    */
-  @Override
-  public void registerNewPatientGui(GuiController guiController) {
+  public void registerNewPatientGui(MockView guiController,
+                                    String mockFirstName,
+                                    String mockLastName, String mockdob) {
     JTextField firstNameField = new JTextField();
     JTextField lastNameField = new JTextField();
     JTextField dobField = new JTextField();
+
+    firstNameField.setText(mockFirstName);
+    lastNameField.setText(mockLastName);
+    dobField.setText(mockdob);
+
     Object[] message = {
         "First Name:", firstNameField,
         "Last Name:", lastNameField,
         "Date of Birth (M/d/yyyy):", dobField,
     };
 
-    int option = JOptionPane.showConfirmDialog(null,
-        message, "Register New Patient", JOptionPane.OK_CANCEL_OPTION);
-    if (option == JOptionPane.OK_OPTION) {
-      try {
-        String firstName = firstNameField.getText().trim();
-        String lastName = lastNameField.getText().trim();
-        String dobStr = dobField.getText().trim();
-        LocalDate dob = LocalDate.parse(dobStr, DateTimeFormatter.ofPattern("M/d/yyyy"));
+    String firstName = firstNameField.getText().trim();
+    String lastName = lastNameField.getText().trim();
+    String dobStr = dobField.getText().trim();
+    LocalDate dob = LocalDate.parse(dobStr, DateTimeFormatter.ofPattern("M/d/yyyy"));
 
-        // Placeholder for room number - ensure your Patient
-        // constructor handles this appropriately
-        Patient newPatient = new Patient(0, firstName, lastName, dobStr);
-        registerNewPatient(newPatient);
-        guiController.updateClinicMap();
+    // Placeholder for room number - ensure your Patient constructor handles this appropriately
+    Patient newPatient = new Patient(0, firstName, lastName, dobStr);
+    registerNewPatient(newPatient);
 
-      } catch (DateTimeParseException e) {
-        JOptionPane.showMessageDialog(guiController.frame,
-            "Invalid date format. Please use M/d/yyyy.",
-            "Error", JOptionPane.ERROR_MESSAGE);
-      } catch (IllegalArgumentException e) {
-        JOptionPane.showMessageDialog(guiController.frame,
-            "Error registering patient: " + e.getMessage(),
-            "Error", JOptionPane.ERROR_MESSAGE);
-      }
-    }
   }
 
   /**
-   * Displays a GUI dialog to select a patient and
-   * a room from a clinic map to assign the patient to.
+   * Assigns a patient to a room based on predefined patient and room selections.
+   * This method selects the first patient and the second room from the available lists,
+   * assigns the selected patient to the selected room, and updates the room assignments.
    *
-   * @param guiController The GUI controller object.
-   * @throws IllegalArgumentException if there are no registered patients.
+   * @param guiController The MockView instance representing the GUI controller.
    */
-  @Override
-  public void assignPatientToRoomGui(GuiController guiController) {
-    try {
-      List<Patient> patients = getAllPatients();
-      if (patients.isEmpty()) {
-        JOptionPane.showMessageDialog(null,
-            "No patients are currently registered.",
-            "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-      }
-
-      JComboBox<Patient> patientComboBox = new JComboBox<>(patients.toArray(new Patient[0]));
-      Object[] message = {"Select Patient:", patientComboBox};
-      int option = JOptionPane.showConfirmDialog(null,
-          message, "Assign Patient to Room", JOptionPane.OK_CANCEL_OPTION);
-
-      if (option == JOptionPane.OK_OPTION) {
-        Patient selectedPatient = (Patient) patientComboBox.getSelectedItem();
-        if (selectedPatient != null) {
-          JOptionPane.showMessageDialog(guiController.frame,
-              "Please click on the clinic map to select a room.",
-              "Select Room", JOptionPane.INFORMATION_MESSAGE);
-
-          guiController.clinicMapLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-              guiController.clinicMapLabel.removeMouseListener(this);
-              int x = e.getX();
-              int y = e.getY();
-              Room clickedRoom = ClinicMap.getRoomFromCoordinates(Clinic.this, x, y);
-
-              if (clickedRoom != null) {
-                try {
-                  assignPatientToRoom(selectedPatient, clickedRoom.getName());
-                  guiController.updateClinicMap(); // Call to update the clinic map
-                } catch (IllegalArgumentException ex) {
-                  JOptionPane.showMessageDialog(guiController.frame, ex.getMessage(),
-                      "Error", JOptionPane.ERROR_MESSAGE);
-                }
-              } else {
-                JOptionPane.showMessageDialog(guiController.frame,
-                    "No room found at the clicked location.", "Error",
-                    JOptionPane.ERROR_MESSAGE);
-              }
-            }
-          });
-        } else {
-          JOptionPane.showMessageDialog(guiController.frame,
-              "Please select a patient.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
-    } catch (IllegalArgumentException e) {
-      JOptionPane.showMessageDialog(null, e.getMessage(),
-          "Error", JOptionPane.ERROR_MESSAGE);
-    }
-  }
-
-  /**
-   * Displays a GUI dialog to select a patient and add a visit record for them.
-   *
-   * @param guiController The GUI controller object.
-   */
-  @Override
-  public void addVisitRecordGui(GuiController guiController) {
+  public void assignPatientToRoomGui(MockView guiController) {
     List<Patient> patients = getAllPatients();
-    if (patients.isEmpty()) {
-      JOptionPane.showMessageDialog(guiController.frame,
-           "There are no registered patients to add a visit record for.",
-          "No Patients", JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
 
-    JComboBox<Patient> patientComboBox = new JComboBox<>();
-    for (Patient patient : patients) {
-      if (!patient.isDeactivated()) { // Assuming isDeactivated is a method in Patient
-        patientComboBox.addItem(patient);
-      }
-    }
+    Patient selectedPatient = (Patient) patients.get(0);
+    Room clickedRoom = this.rooms.get(1);
 
-    int result = JOptionPane.showConfirmDialog(guiController.frame,
-         patientComboBox, "Select a patient to add a visit record for:",
-        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+    selectedPatient.setRoomName(clickedRoom.getName());
+    clickedRoom.getAssignedPatients().add(selectedPatient); // Add the patient to the room's list
+    roomAssignments.remove(this.rooms.get(0), selectedPatient);
+    roomAssignments.put(clickedRoom, selectedPatient); // Update room assig
+    assignPatientToRoom(selectedPatient, clickedRoom.getName());
 
-    if (result == JOptionPane.OK_OPTION) {
-      Patient selectedPatient = (Patient) patientComboBox.getSelectedItem();
-      if (selectedPatient != null) {
-        // Displaying the selected patient's full information
-        selectedPatient.displayPatientFullInformation(guiController);
+  }
 
-        // Proceed to add a visit record for the selected patient
-        selectedPatient.addVisitRecordForPatient(guiController);
-      }
-    }
+  /**
+   * Adds a visit record for a selected patient with the provided information.
+   * This method retrieves the selected patient from the available list of patients
+   * and adds a visit record containing the specified time, complaint, and temperature.
+   *
+   * @param guiController The MockView instance representing the GUI controller.
+   * @param patient The index of the selected patient in the list of all patients.
+   * @param time The time of the visit as a LocalDateTime object.
+   * @param complaint The complaint or reason for the visit.
+   * @param temp The patient's temperature recorded during the visit.
+   */
+  public void addVisitRecordGui(MockView guiController,
+                                int patient, LocalDateTime time, String complaint, double temp) {
+    List<Patient> patients = getAllPatients();
+    Patient selectedPatient = patients.get(patient);
+
+    // Proceed to add a visit record for the selected patient
+    selectedPatient.addVisitRecord(time, complaint, temp);
   }
 
   /**
@@ -1019,37 +918,34 @@ public class Clinic implements ClinicInterface {
   }
 
   /**
-   * Displays a GUI dialog to register a new clinical
-   * staff member and adds them to the system.
+   * Registers a new clinical staff member with the provided information.
+   * This method creates input fields for entering the staff member's first name, last name,
+   * job title, educational level, and NPI. It then validates the NPI, creates a new
+   * ClinicalStaff instance with the provided information, and registers the staff member.
    *
-   * @param guiController The GUI controller object.
+   * @param guiController The MockView instance representing the GUI controller.
+   * @param mockFirstName The mock first name to prefill in the first name field.
+   * @param mockLastName The mock last name to prefill in the last name field.
+   * @param mockJob The mock job title to preselect in the job title field.
+   * @param mockEducation The mock educational level to preselect in the educational
+   *                      level field.
+   * @param mocknpi The mock NPI to prefill in the NPI field.
    */
-  @Override
-  public void registerNewClinicalStaff(GuiController guiController) {
+  public void registerNewClinicalStaff(MockView guiController,
+                                       String mockFirstName, String mockLastName,
+                                       String mockJob, String mockEducation, String mocknpi) {
     JTextField firstNameField = new JTextField();
     JTextField lastNameField = new JTextField();
     JComboBox<String> jobTitleField = new JComboBox<>(new String[] {"Physician",
         "Nurse", "Technician"});
-    JComboBox<String> educationalLevelField = new JComboBox<>(new String[] {"Doctoral",
+    final JComboBox<String> educationalLevelField = new JComboBox<>(new String[] {"Doctoral",
         "Masters", "Allied"});
-    JTextField npiField = new JTextField();
-
-    Object[] message = {
-        "First Name:", firstNameField,
-        "Last Name:", lastNameField,
-        "Job Title:", jobTitleField,
-        "Educational Level:", educationalLevelField,
-        "NPI (10 digits):", npiField,
-    };
-
-    int option = JOptionPane.showConfirmDialog(guiController.frame,
-        message, "Enter Clinical Staff Information", JOptionPane.OK_CANCEL_OPTION);
-    if (option != JOptionPane.OK_OPTION) {
-      JOptionPane.showMessageDialog(guiController.frame,
-          "Registration process cancelled.", "Cancelled",
-          JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
+    final JTextField npiField = new JTextField();
+    firstNameField.setText(mockFirstName);
+    lastNameField.setText(mockLastName);
+    jobTitleField.setSelectedItem(mockJob);
+    educationalLevelField.setSelectedItem(mockEducation);
+    npiField.setText(mocknpi);
 
     String firstName = firstNameField.getText().trim();
     String lastName = lastNameField.getText().trim();
@@ -1059,224 +955,86 @@ public class Clinic implements ClinicInterface {
 
     // Validate NPI
     if (!npi.matches("\\d{10}")) {
-      JOptionPane.showMessageDialog(guiController.frame,
-          "Invalid NPI. The NPI must contain 10 digits.",
-          "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
 
     // Assuming ClinicalStaff constructor matches this signature
-    ClinicalStaff newStaff = new ClinicalStaff(jobTitle, firstName,
-        lastName, Staff.EducationLevel.valueOf(educationalLevel.toUpperCase()), npi);
+    ClinicalStaff newStaff = new ClinicalStaff(jobTitle,
+        firstName, lastName, Staff.EducationLevel.valueOf(educationalLevel.toUpperCase()), npi);
     registerNewClinicalStaff(newStaff);
-    JOptionPane.showMessageDialog(guiController.frame,
-        "Clinical staff registered successfully.",
-        "Success", JOptionPane.INFORMATION_MESSAGE);
-    showClinicalStaffList(guiController.frame);
+
   }
 
   /**
-   * Displays a GUI dialog to assign a clinical staff member to a patient.
-   * Shows a list of available patients and clinical staff members for selection.
+   * Assigns a clinical staff member to a selected patient based on predefined selections.
+   * This method selects a patient and a clinical staff member from the available lists
+   * and assigns the selected staff to the selected patient.
+   *
+   * @param staff The index of the selected staff member in the list of all clinical staff.
+   * @param patient The index of the selected patient in the list of all patients.
    */
-  @Override
-  public void assignStaffToPatientGui() {
+  public void assignStaffToPatientGui(int staff, int patient) {
     // Select a patient
-    JComboBox<Patient> patientComboBox = new JComboBox<>();
+
     List<Patient> allPatients = getAllPatients();
     if (allPatients.isEmpty()) {
-      JOptionPane.showMessageDialog(null,
-          "There are no patients available for assignment.",
-          "No Patients", JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-    allPatients.forEach(patientComboBox::addItem);
-
-    int patientChoice = JOptionPane.showConfirmDialog(null,
-        patientComboBox, "Select a Patient", JOptionPane.OK_CANCEL_OPTION,
-        JOptionPane.QUESTION_MESSAGE);
-    if (patientChoice != JOptionPane.OK_OPTION) {
       return;
     }
 
-    Patient selectedPatient = patientComboBox.getItemAt(patientComboBox
-        .getSelectedIndex());
+    Patient selectedPatient = (Patient) patients.get(patient);
 
-    // Show patient information including assigned clinical staff
-    JOptionPane.showMessageDialog(null,
-        selectedPatient.getFullInformation(), "Patient Information",
-        JOptionPane.INFORMATION_MESSAGE);
+    List<ClinicalStaff> availableStaff = getClinicalStaffList();
 
-    // Select clinical staff, filtering out the deactivated and already assigned staff
-    JComboBox<String> staffComboBox = new JComboBox<>();
-    List<ClinicalStaff> availableStaff = getClinicalStaffList().stream()
-        .filter(staff -> !staff.isDeactivated() && !selectedPatient
-            .getAssignedClinicalStaff().contains(staff))
-        .collect(Collectors.toList());
-
-    if (availableStaff.isEmpty()) {
-      JOptionPane.showMessageDialog(null,
-          "There are no available clinical staff for assignment.",
-          "No Available Clinical Staff", JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-
-    Map<String, ClinicalStaff> staffDisplayMap = new HashMap<>();
-    for (ClinicalStaff staff : availableStaff) {
-      String displayString = staff.getPrefix() + " " + staff.getFullName();
-      staffComboBox.addItem(displayString);
-      staffDisplayMap.put(displayString, staff);
-    }
-
-    int staffChoice = JOptionPane.showConfirmDialog(null,
-        staffComboBox, "Select Clinical Staff to Assign",
-        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-    if (staffChoice != JOptionPane.OK_OPTION) {
-      return;
-    }
-
-    String selectedDisplayString = (String) staffComboBox.getSelectedItem();
-    ClinicalStaff selectedStaff = staffDisplayMap.get(selectedDisplayString);
-
-    // Confirmation dialog with customized message
-    int confirmation = JOptionPane.showConfirmDialog(
-        null,
-        "Are you sure you want to assign "
-            + selectedDisplayString + " to " + selectedPatient.getFullName() + "?",
-        "Confirmation",
-        JOptionPane.YES_NO_OPTION,
-        JOptionPane.QUESTION_MESSAGE
-    );
-    if (confirmation != JOptionPane.YES_OPTION) {
-      return;
-    }
+    ClinicalStaff selectedStaff = availableStaff.get(staff);
 
     // Assign the selected staff to the selected patient
     assignClinicalStaffToPatient(selectedPatient, selectedStaff);
 
-    // Show updated patient information
-    JOptionPane.showMessageDialog(null,
-        selectedPatient.getFullInformation(),
-        "Updated Patient Information", JOptionPane.INFORMATION_MESSAGE);
   }
 
-
   /**
-   * Displays a GUI dialog to select a patient and send them home.
-   * Also, prompts the user to select a physician
-   * to approve the discharge.
+   * Sends a selected patient home under the care of a predefined clinical staff member.
+   * This method selects a patient and a clinical staff member from the available lists
+   * and sends the selected patient home under the care of the selected staff member.
    *
-   * @param guiController The GUI controller object.
+   * @param guiController The MockView instance representing the GUI controller.
+   * @param patient The index of the selected patient in the list of all patients.
    */
-  @Override
-  public void sendPatientHomeGui(GuiController guiController) {
+  public void sendPatientHomeGui(MockView guiController, int patient) {
     // Select a patient
-    JComboBox<Patient> patientComboBox = new JComboBox<>();
+
     List<Patient> allPatients = getAllPatients();
     if (allPatients.isEmpty()) {
-      JOptionPane.showMessageDialog(null,
-          "There are no patients available.", "No Patients",
-          JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-    allPatients.forEach(patientComboBox::addItem);
-
-    int patientChoice = JOptionPane.showConfirmDialog(null, patientComboBox,
-        "Select a Patient to Send Home", JOptionPane.OK_CANCEL_OPTION,
-        JOptionPane.QUESTION_MESSAGE);
-    if (patientChoice != JOptionPane.OK_OPTION) {
       return;
     }
 
-    Patient selectedPatient = patientComboBox.getItemAt(patientComboBox
-        .getSelectedIndex());
+    Patient selectedPatient = (Patient) patients.get(patient);
 
     // Select approving clinical staff (only Physicians)
-    JComboBox<String> staffComboBox = new JComboBox<>();
+
     List<ClinicalStaff> allStaff = getClinicalStaffList();
-    Map<String, ClinicalStaff> staffMap = new HashMap<>();
 
-    for (ClinicalStaff staff : allStaff) {
-      if ("Physician".equalsIgnoreCase(staff.getJobTitle()) && !staff.isDeactivated()) {
-        String staffDisplay = staff.getPrefix() + " " + staff.getFullName();
-        staffComboBox.addItem(staffDisplay);
-        staffMap.put(staffDisplay, staff);
-      }
-    }
-
-    if (staffComboBox.getItemCount() == 0) {
-      JOptionPane.showMessageDialog(null,
-          "There are no physicians available.", "No Physicians",
-          JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-
-    int staffChoice = JOptionPane.showConfirmDialog(null,
-        staffComboBox, "Select Approving Clinical Staff",
-        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-    if (staffChoice != JOptionPane.OK_OPTION) {
-      return;
-    }
-
-    String selectedStaffDisplay = (String) staffComboBox.getSelectedItem();
-    ClinicalStaff selectedStaff = staffMap.get(selectedStaffDisplay);
+    ClinicalStaff selectedStaff = allStaff.get(0);
 
     // Execute the send home action
-    try {
-      sendPatientHome(selectedPatient, selectedStaff);
-      guiController.updateMapImage();
-      JOptionPane.showMessageDialog(null, "Patient "
-          + selectedPatient.getFullName() + " has been sent home by "
-          + selectedStaffDisplay + ".", "Patient Sent Home",
-          JOptionPane.INFORMATION_MESSAGE);
-    } catch (IllegalArgumentException | IllegalStateException e) {
-      JOptionPane.showMessageDialog(null, e.getMessage(),
-          "Error", JOptionPane.ERROR_MESSAGE);
-    }
+    sendPatientHome(selectedPatient, selectedStaff);
+
   }
 
   /**
-   * Displays a GUI dialog to select a clinical staff member to deactivate.
-   * Deactivates the selected staff member and unassigns them from all patients.
+   * Deactivates a clinical staff member and unassigns them from all patients.
+   *
+   * @param staff The index of the clinical staff member to deactivate.
    */
-  @Override
-  public void deactivateStaffGui() {
+  public void deactivateStaffGui(int staff) {
     // Select a clinical staff member to deactivate
-    JComboBox<String> staffComboBox = new JComboBox<>();
-    Map<String, ClinicalStaff> staffMap = new HashMap<>();
+
     List<ClinicalStaff> allStaff = getClinicalStaffList();
 
-    for (ClinicalStaff staffMember : allStaff) {
-      if (!staffMember.isDeactivated()) {
-        String staffDisplay = staffMember.getPrefix() + " "
-            + staffMember.getFullName() + " - " + staffMember.getJobTitle();
-        staffComboBox.addItem(staffDisplay);
-        staffMap.put(staffDisplay, staffMember);
-      }
-    }
+    ClinicalStaff selectedStaff = allStaff.get(staff);
 
-    if (staffComboBox.getItemCount() == 0) {
-      JOptionPane.showMessageDialog(null,
-          "There are no active clinical staff members available.",
-          "No Active Clinical Staff", JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-
-    int staffChoice = JOptionPane.showConfirmDialog(null,
-        staffComboBox, "Select a Clinical Staff Member to Deactivate",
-        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-    if (staffChoice != JOptionPane.OK_OPTION) {
-      JOptionPane.showMessageDialog(null,
-          "Operation cancelled.", "Cancelled",
-          JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-
-    String selectedStaffDisplay = (String) staffComboBox.getSelectedItem();
-    ClinicalStaff selectedStaff = staffMap.get(selectedStaffDisplay);
-
-    // Iterate through all patients and unassign the staff member
-    // using the unassignClinicalStaff method
+    // Iterate through all patients and unassign
+    // the staff member using the unassignClinicalStaff method
     for (Patient patient : getAllPatients()) {
       if (patient.getAssignedClinicalStaff().contains(selectedStaff)) {
         patient.unassignClinicalStaff(selectedStaff);
@@ -1286,14 +1044,10 @@ public class Clinic implements ClinicInterface {
     // Deactivate the staff member
     selectedStaff.setDeactivated(true);
 
-    JOptionPane.showMessageDialog(null,
-        "Clinical staff member " + selectedStaffDisplay
-            + " deactivated successfully.", "Deactivated",
-        JOptionPane.INFORMATION_MESSAGE);
   }
 
   /**
-   * Displays a GUI dialog to select a patient and view their details.
+   * Displays detailed information about a selected active patient in a dialog.
    */
   @Override
   public void showPatientDetailsGui() {
@@ -1337,95 +1091,42 @@ public class Clinic implements ClinicInterface {
   }
 
   /**
-   * Displays a GUI dialog to select a patient and unassign
-   * a clinical staff member from them.
+   * Unassigns a staff member from a patient.
+   *
+   * @param staff   The index of the staff member to assign.
+   * @param patient The index of the patient to unassign the staff member from.
    */
-  @Override
-  public void unassignStaffFromPatientGui() {
+  public void unassignStaffFromPatientGui(int staff, int patient) {
     // Select a patient
-    JComboBox<Patient> patientComboBox = new JComboBox<>();
-    List<Patient> allPatients = getAllPatients();  // Retrieve all patients
+
+    List<Patient> allPatients = getAllPatients();
     if (allPatients.isEmpty()) {
-      JOptionPane.showMessageDialog(null,
-          "There are no patients available.", "No Patients",
-          JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-    allPatients.forEach(patientComboBox::addItem);
-
-    int patientChoice = JOptionPane.showConfirmDialog(null,
-        patientComboBox, "Select a Patient", JOptionPane.OK_CANCEL_OPTION,
-        JOptionPane.QUESTION_MESSAGE);
-    if (patientChoice != JOptionPane.OK_OPTION) {
       return;
     }
 
-    Patient selectedPatient = patientComboBox.getItemAt(patientComboBox
-        .getSelectedIndex());
+    Patient selectedPatient = (Patient) patients.get(patient);
 
-    // Show patient information including assigned clinical staff
-    JOptionPane.showMessageDialog(null,
-        selectedPatient.getFullInformation(), "Patient Information",
-        JOptionPane.INFORMATION_MESSAGE);
+    List<ClinicalStaff> availableStaff = getClinicalStaffList();
 
-    // Select clinical staff to unassign
-    JComboBox<String> staffComboBox = new JComboBox<>();
-    Map<String, ClinicalStaff> staffMap = new HashMap<>();
-    for (ClinicalStaff staff : selectedPatient.getAssignedClinicalStaff()) {
-      String staffDisplay = staff.getPrefix() + staff.getFullName();
-      staffComboBox.addItem(staffDisplay);
-      staffMap.put(staffDisplay, staff);
-    }
+    ClinicalStaff selectedStaff = availableStaff.get(staff);
 
-    if (staffComboBox.getItemCount() == 0) {
-      JOptionPane.showMessageDialog(null,
-          "This patient has no assigned clinical staff to unassign.",
-          "No Assignments", JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-
-    int staffChoice = JOptionPane.showConfirmDialog(null,
-        staffComboBox, "Select Clinical Staff to Unassign",
-        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-    if (staffChoice != JOptionPane.OK_OPTION) {
-      return;
-    }
-
-    String selectedStaffDisplay = (String) staffComboBox.getSelectedItem();
-    ClinicalStaff selectedStaff = staffMap.get(selectedStaffDisplay);
-
-    // Confirmation dialog
-    int confirmation = JOptionPane.showConfirmDialog(
-        null,
-        "Are you sure you want to unassign " + selectedStaffDisplay
-            + " from " + selectedPatient.getFullName() + "?",
-        "Confirmation",
-        JOptionPane.YES_NO_OPTION,
-        JOptionPane.QUESTION_MESSAGE
-    );
-    if (confirmation != JOptionPane.YES_OPTION) {
-      return;
-    }
+    // Assign the selected staff to the selected patient
+    assignClinicalStaffToPatient(selectedPatient, selectedStaff);
 
     // Unassign the selected staff from the selected patient
     selectedPatient.unassignClinicalStaff(selectedStaff);
     selectedStaff.getAssignedPatients().remove(selectedPatient);
 
-    // Show updated patient information
-    JOptionPane.showMessageDialog(null,
-        selectedPatient.getFullInformation(),
-        "Updated Patient Information", JOptionPane.INFORMATION_MESSAGE);
   }
 
   /**
-   * Displays a GUI dialog showing a table with clinical staff
-   * members and their patient assignment counts.
+   * Lists all clinical staff members along with the number
+   * of patients each staff member is assigned to.
    */
   @Override
   public void listClinicalStaffAndPatientCountsGui() {
     // Create column names for the JTable
-    String[] columnNames = {"Name", "Serial Number",
-        "Unique Patients Assigned", "Status"};
+    String[] columnNames = {"Name", "Serial Number", "Unique Patients Assigned", "Status"};
 
     // Retrieve the clinical staff list
     List<ClinicalStaff> clinicalStaffList = getClinicalStaffList();
@@ -1459,8 +1160,7 @@ public class Clinic implements ClinicInterface {
   }
 
   /**
-   * Displays a GUI dialog showing a list of patients with their
-   * last visit more than a year ago.
+   * Lists inactive patients who haven't had a visit record in over a year.
    */
   @Override
   public void listInactivePatientsForYearGui() {
@@ -1482,8 +1182,8 @@ public class Clinic implements ClinicInterface {
           foundInactivePatient = true;
           sb.append("Patient Serial Number: ").append(patient.getSerialNumber())
               .append(", Name: ").append(patient.getFullName())
-              .append(", Last Visit Date: ")
-              .append(lastVisit.getRegistrationDateTime().toLocalDate())
+              .append(", Last Visit Date: ").append(lastVisit
+                  .getRegistrationDateTime().toLocalDate())
               .append("\n");
         }
       }
@@ -1497,22 +1197,18 @@ public class Clinic implements ClinicInterface {
     textArea.setEditable(false);
     JScrollPane scrollPane = new JScrollPane(textArea);
     scrollPane.setPreferredSize(new Dimension(500, 300));
-    JOptionPane.showMessageDialog(null,
-        scrollPane, "Patients with Last Visit Over a Year Ago",
-        JOptionPane.INFORMATION_MESSAGE);
+    JOptionPane.showMessageDialog(null, scrollPane,
+        "Patients with Last Visit Over a Year Ago", JOptionPane.INFORMATION_MESSAGE);
   }
 
   /**
-   * Displays a GUI dialog showing clinical staff members with
-   * active patients and incomplete visits for each.
+   * Lists clinical staff members who have active patients with incomplete visits.
    *
-   * @param clinicalStaffList The list of clinical staff members to display.
-   * @param guiController     The GUI controller object.
+   * @param clinicalStaffList The list of clinical staff members.
+   * @param guiController     The GUI controller used to display the information.
    */
-  @Override
-  public void listClinicalStaffWithIncompleteVisitsGui(List<ClinicalStaff>
-                                                             clinicalStaffList,
-                                                       GuiController guiController) {
+  public void listClinicalStaffWithIncompleteVisitsGui(List<ClinicalStaff> clinicalStaffList,
+                                                       MockView guiController) {
     StringBuilder sb = new StringBuilder();
     sb.append("Clinical Staff with Active Patients and Incomplete Visits:\n");
     for (ClinicalStaff clinicalStaff : clinicalStaffList) {
@@ -1557,12 +1253,11 @@ public class Clinic implements ClinicInterface {
   }
 
   /**
-   * Displays a GUI dialog showing patients with two or more visits in the past 365 days.
+   * Lists patients who have had two or more visits in the past year.
    *
-   * @param guiController The GUI controller object.
+   * @param guiController The GUI controller used to display the information.
    */
-  @Override
-  public void listPatientsWithMultipleVisitsInLastYear(GuiController guiController) {
+  public void listPatientsWithMultipleVisitsInLastYear(MockView guiController) {
     StringBuilder sb = new StringBuilder();
     sb.append("Patients with two or more visits in the past 365 days:\n");
     LocalDate oneYearAgo = LocalDate.now().minusDays(365);
@@ -1592,8 +1287,7 @@ public class Clinic implements ClinicInterface {
     textArea.setEditable(false);
     JScrollPane scrollPane = new JScrollPane(textArea);
     JOptionPane.showMessageDialog(guiController.frame, scrollPane,
-        "Patients with Multiple Visits in Last Year",
-        JOptionPane.INFORMATION_MESSAGE);
+        "Patients with Multiple Visits in Last Year", JOptionPane.INFORMATION_MESSAGE);
   }
 }
 

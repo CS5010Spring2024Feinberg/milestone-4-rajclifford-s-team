@@ -8,8 +8,18 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Utility class for generating a clinic map image and handling
+ * room selection based on coordinates.
+ */
 public class ClinicMap {
 
+  /**
+   * Generates a clinic map image based on the provided clinic object.
+   *
+   * @param clinic The clinic object containing rooms to be displayed on the map.
+   * @return The generated BufferedImage representing the clinic map.
+   */
   public static BufferedImage createClinicMap(Clinic clinic) {
     List<Room> rooms = clinic.getRooms();
     if (rooms == null || rooms.isEmpty()) {
@@ -28,10 +38,14 @@ public class ClinicMap {
     Font font = new Font("SansSerif", Font.BOLD, 12);
     graphics.setFont(font);
 
-    int minClinicX = rooms.stream().min(Comparator.comparingInt(r -> r.getCoordinates().get("lowerLeftX"))).orElseThrow().getCoordinates().get("lowerLeftX");
-    int maxClinicX = rooms.stream().max(Comparator.comparingInt(r -> r.getCoordinates().get("upperRightX"))).orElseThrow().getCoordinates().get("upperRightX");
-    int minClinicY = rooms.stream().min(Comparator.comparingInt(r -> r.getCoordinates().get("lowerLeftY"))).orElseThrow().getCoordinates().get("lowerLeftY");
-    int maxClinicY = rooms.stream().max(Comparator.comparingInt(r -> r.getCoordinates().get("upperRightY"))).orElseThrow().getCoordinates().get("upperRightY");
+    int minClinicX = rooms.stream().min(Comparator.comparingInt(r ->
+        r.getCoordinates().get("lowerLeftX"))).orElseThrow().getCoordinates().get("lowerLeftX");
+    int maxClinicX = rooms.stream().max(Comparator.comparingInt(r ->
+        r.getCoordinates().get("upperRightX"))).orElseThrow().getCoordinates().get("upperRightX");
+    int minClinicY = rooms.stream().min(Comparator.comparingInt(r ->
+        r.getCoordinates().get("lowerLeftY"))).orElseThrow().getCoordinates().get("lowerLeftY");
+    int maxClinicY = rooms.stream().max(Comparator.comparingInt(r ->
+        r.getCoordinates().get("upperRightY"))).orElseThrow().getCoordinates().get("upperRightY");
 
     double scaleX = (width - 100.0) / (maxClinicX - minClinicX);
     double scaleY = (height - 100.0) / (maxClinicY - minClinicY);
@@ -43,14 +57,17 @@ public class ClinicMap {
     for (Room room : rooms) {
       Map<String, Integer> coordinates = room.getCoordinates();
       int x1 = (int) ((coordinates.get("lowerLeftX") - minClinicX) * scaleFactor) + paddingX;
-      int y1 = height - ((int) ((coordinates.get("lowerLeftY") - minClinicY) * scaleFactor) + paddingY);
+      int y1 = height - ((int) ((coordinates.get("lowerLeftY") - minClinicY) * scaleFactor)
+          + paddingY);
       int x2 = (int) ((coordinates.get("upperRightX") - minClinicX) * scaleFactor) + paddingX;
-      int y2 = height - ((int) ((coordinates.get("upperRightY") - minClinicY) * scaleFactor) + paddingY);
+      int y2 = height - ((int) ((coordinates.get("upperRightY") - minClinicY) * scaleFactor)
+          + paddingY);
 
       // Set the color for the room based on its type
       Color roomColor = getColorForRoomType(String.valueOf(room.getType()));
       graphics.setColor(roomColor);
-      graphics.fillRect(x1, y2, x2 - x1, y1 - y2); // Fill the rectangle with selected color
+      graphics.fillRect(x1, y2, x2 - x1, y1 - y2);
+      // Fill the rectangle with selected color
 
       // Set the color for the room border
       graphics.setColor(Color.black);
@@ -79,7 +96,8 @@ public class ClinicMap {
 
       // Patient names
       List<Patient> patients = room.getAssignedPatients();
-      int patientNameY = titleY + graphics.getFontMetrics(roomFont).getHeight() + spaceBelowTitle;
+      int patientNameY = titleY + graphics.getFontMetrics(roomFont).getHeight()
+          + spaceBelowTitle;
       if (patients.isEmpty()) {
         graphics.drawString("Empty", labelStartX, patientNameY);
       } else {
@@ -88,10 +106,12 @@ public class ClinicMap {
           int patientNameWidth = graphics.getFontMetrics().stringWidth(patientName);
           int patientNameStartX = x1 + 5; // Start from the left with a margin
           if (patientNameStartX + patientNameWidth > x2) {
-            patientNameStartX = x2 - patientNameWidth - 5; // Adjust to fit within the right boundary
+            patientNameStartX = x2 - patientNameWidth - 5;
+            // Adjust to fit within the right boundary
           }
           graphics.drawString(patientName, patientNameStartX, patientNameY);
-          patientNameY += graphics.getFontMetrics(patientFont).getHeight(); // Increment Y position for next patient name
+          patientNameY += graphics.getFontMetrics(patientFont).getHeight();
+          // Increment Y position for next patient name
         }
       }
 
@@ -109,7 +129,15 @@ public class ClinicMap {
 
 
 
-
+  /**
+   * Retrieves the room at the specified coordinates on the clinic map.
+   *
+   * @param clinic The clinic object containing rooms.
+   * @param x      The x-coordinate of the click on the clinic map.
+   * @param y      The y-coordinate of the click on the clinic map.
+   * @return The Room object corresponding to the clicked coordinates,
+   *        or null if no room is found.
+   */
   public static Room getRoomFromCoordinates(Clinic clinic, int x, int y) {
     List<Room> rooms = clinic.getRooms();
     if (rooms == null || rooms.isEmpty()) {
@@ -121,10 +149,14 @@ public class ClinicMap {
     final int height = 800;
 
     // Minimum and maximum coordinates used in createClinicMap
-    int minClinicX = rooms.stream().min(Comparator.comparingInt(r -> r.getCoordinates().get("lowerLeftX"))).orElseThrow().getCoordinates().get("lowerLeftX");
-    int maxClinicX = rooms.stream().max(Comparator.comparingInt(r -> r.getCoordinates().get("upperRightX"))).orElseThrow().getCoordinates().get("upperRightX");
-    int minClinicY = rooms.stream().min(Comparator.comparingInt(r -> r.getCoordinates().get("lowerLeftY"))).orElseThrow().getCoordinates().get("lowerLeftY");
-    int maxClinicY = rooms.stream().max(Comparator.comparingInt(r -> r.getCoordinates().get("upperRightY"))).orElseThrow().getCoordinates().get("upperRightY");
+    int minClinicX = rooms.stream().min(Comparator.comparingInt(r ->
+        r.getCoordinates().get("lowerLeftX"))).orElseThrow().getCoordinates().get("lowerLeftX");
+    int maxClinicX = rooms.stream().max(Comparator.comparingInt(r ->
+        r.getCoordinates().get("upperRightX"))).orElseThrow().getCoordinates().get("upperRightX");
+    int minClinicY = rooms.stream().min(Comparator.comparingInt(r ->
+        r.getCoordinates().get("lowerLeftY"))).orElseThrow().getCoordinates().get("lowerLeftY");
+    int maxClinicY = rooms.stream().max(Comparator.comparingInt(r ->
+        r.getCoordinates().get("upperRightY"))).orElseThrow().getCoordinates().get("upperRightY");
 
     // Scale factors used in createClinicMap
     double scaleX = (width - 100.0) / (maxClinicX - minClinicX);
@@ -147,7 +179,8 @@ public class ClinicMap {
       int lowerLeftY = coordinates.get("lowerLeftY");
       int upperRightY = coordinates.get("upperRightY");
 
-      if (clinicX >= lowerLeftX && clinicX <= upperRightX && clinicY >= lowerLeftY && clinicY <= upperRightY) {
+      if (clinicX >= lowerLeftX && clinicX <= upperRightX && clinicY
+          >= lowerLeftY && clinicY <= upperRightY) {
         return room;
       }
     }
@@ -155,6 +188,12 @@ public class ClinicMap {
     return null; // No room found at the clicked coordinates
   }
 
+  /**
+   * Determines the color for a room based on its type.
+   *
+   * @param type The type of the room.
+   * @return The Color object representing the room color.
+   */
   private static Color getColorForRoomType(String type) {
     switch (type.toLowerCase()) {
       case "surgical":

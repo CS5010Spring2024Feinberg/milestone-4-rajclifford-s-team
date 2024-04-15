@@ -1,14 +1,23 @@
 package clinicmanagement;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Scanner;
 import java.util.stream.Collectors;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 /**
  * Represents a patient in a clinic.
@@ -223,6 +232,7 @@ public class Patient implements PatientInterface {
       assignedClinicalStaff.add(clinicalStaff);
     }
   }
+
   /**
    * Populates room information from the given room object.
    *
@@ -355,7 +365,8 @@ public class Patient implements PatientInterface {
     info.append("Patient Information:\n");
     info.append("Serial Number: ").append(getSerialNumber()).append("\n");
     info.append("Name: ").append(getFullName()).append("\n");
-    info.append("Date of Birth: ").append(dateOfBirth.format(DateTimeFormatter.ofPattern("M/d/yyyy"))).append("\n");
+    info.append("Date of Birth: ").append(dateOfBirth
+        .format(DateTimeFormatter.ofPattern("M/d/yyyy"))).append("\n");
     info.append("Room Number: ").append(roomNumber).append("\n");
     info.append("Room Name: ").append(roomName).append("\n");
     info.append("Room Type: ").append(roomType != null ? roomType.getType() : "N/A").append("\n\n");
@@ -366,7 +377,8 @@ public class Patient implements PatientInterface {
       info.append("Visit Records:\n");
       for (Visitrecord visitRecord : visitRecords) {
         info.append("\tRegistration Date and Time: ")
-            .append(visitRecord.getRegistrationDateTime().format(DateTimeFormatter.ofPattern("M/d/yyyy HH:mm:ss")))
+            .append(visitRecord.getRegistrationDateTime()
+                .format(DateTimeFormatter.ofPattern("M/d/yyyy HH:mm:ss")))
             .append("\n\tChief Complaint: ")
             .append(visitRecord.getChiefComplaint())
             .append("\n\tBody Temperature: ")
@@ -383,7 +395,8 @@ public class Patient implements PatientInterface {
     if (!activeAssignedStaff.isEmpty()) {
       info.append("Assigned Clinical Staff:\n");
       for (ClinicalStaff staff : activeAssignedStaff) {
-        info.append("\t- ").append(staff.getPrefix()).append(" ").append(staff.getFullName()).append("\n");
+        info.append("\t- ").append(staff.getPrefix()).append(" ")
+            .append(staff.getFullName()).append("\n");
       }
     } else {
       info.append("No clinical staff assigned.\n");
@@ -492,50 +505,70 @@ public class Patient implements PatientInterface {
 
   }
 
+  /**
+   * Prompts the user to add a visit record for a patient.
+   *
+   * @param guiController The GUI controller for handling user interactions.
+   */
   public void addVisitRecordForPatient(GuiController guiController) {
-    String registrationDateStr = JOptionPane.showInputDialog(guiController.frame, "Enter registration date (yyyy-MM-dd):");
+    String registrationDateStr = JOptionPane.showInputDialog(guiController.frame,
+        "Enter registration date (yyyy-MM-dd):");
     if (registrationDateStr == null || registrationDateStr.trim().isEmpty()) {
-      JOptionPane.showMessageDialog(guiController.frame, "Registration date is required.", "Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(guiController.frame,
+          "Registration date is required.", "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
 
     LocalDate registrationDate;
     try {
-      registrationDate = LocalDate.parse(registrationDateStr.trim(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+      registrationDate = LocalDate.parse(registrationDateStr.trim(),
+          DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     } catch (DateTimeParseException e) {
-      JOptionPane.showMessageDialog(guiController.frame, "Invalid date format. Please enter the date in yyyy-MM-dd format.", "Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(guiController.frame,
+          "Invalid date format. Please enter the date in yyyy-MM-dd format.",
+          "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
 
-    String registrationTimeStr = JOptionPane.showInputDialog(guiController.frame, "Enter registration time (HH:mm:ss):");
+    String registrationTimeStr = JOptionPane.showInputDialog(guiController.frame,
+        "Enter registration time (HH:mm:ss):");
     if (registrationTimeStr == null || registrationTimeStr.trim().isEmpty()) {
-      JOptionPane.showMessageDialog(guiController.frame, "Registration time is required.", "Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(guiController.frame,
+          "Registration time is required.", "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
 
     LocalTime registrationTime;
     try {
-      registrationTime = LocalTime.parse(registrationTimeStr.trim(), DateTimeFormatter.ofPattern("HH:mm:ss"));
+      registrationTime = LocalTime.parse(registrationTimeStr.trim(),
+          DateTimeFormatter.ofPattern("HH:mm:ss"));
     } catch (DateTimeParseException e) {
-      JOptionPane.showMessageDialog(guiController.frame, "Invalid time format. Please enter the time in HH:mm:ss format.", "Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(guiController.frame,
+          "Invalid time format. Please enter the time in HH:mm:ss format.",
+          "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
 
     LocalDateTime registrationDateTime = LocalDateTime.of(registrationDate, registrationTime);
     if (!Visitrecord.isValidDate(registrationDateTime)) {
-      JOptionPane.showMessageDialog(guiController.frame, "The registration date and time are invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(guiController.frame,
+          "The registration date and time are invalid.", "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
 
-    String chiefComplaint = JOptionPane.showInputDialog(guiController.frame, "Enter chief complaint:");
+    String chiefComplaint = JOptionPane.showInputDialog(guiController.frame,
+        "Enter chief complaint:");
     if (!Visitrecord.isValidComplaint(chiefComplaint)) {
-      JOptionPane.showMessageDialog(guiController.frame, "Chief complaint is required.", "Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(guiController.frame,
+          "Chief complaint is required.", "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
 
-    String bodyTemperatureStr = JOptionPane.showInputDialog(guiController.frame, "Enter body temperature in Celsius (e.g., 37.5):");
+    String bodyTemperatureStr = JOptionPane.showInputDialog(guiController.frame,
+        "Enter body temperature in Celsius (e.g., 37.5):");
     if (bodyTemperatureStr == null || bodyTemperatureStr.trim().isEmpty()) {
-      JOptionPane.showMessageDialog(guiController.frame, "Body temperature is required.", "Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(guiController.frame,
+          "Body temperature is required.", "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
 
@@ -546,24 +579,40 @@ public class Patient implements PatientInterface {
         throw new IllegalArgumentException("Body temperature is out of the normal range.");
       }
     } catch (NumberFormatException e) {
-      JOptionPane.showMessageDialog(guiController.frame, "Invalid body temperature. Please enter a valid numeric value within the normal range.", "Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(guiController.frame,
+          "Invalid body temperature."
+              +
+              " Please enter a valid numeric value within the normal range.",
+          "Error", JOptionPane.ERROR_MESSAGE);
       return;
     } catch (IllegalArgumentException e) {
-      JOptionPane.showMessageDialog(guiController.frame, "Invalid body temperature. Please enter a valid numeric value within the normal range.", "Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(guiController.frame,
+          "Invalid body temperature. Please enter a valid "
+              +
+              "numeric value within the normal range.", "Error",
+          JOptionPane.ERROR_MESSAGE);
       return;
     }
 
     addVisitRecord(registrationDateTime, chiefComplaint, bodyTemperature);
-    JOptionPane.showMessageDialog(guiController.frame, "Visit record added successfully for " + getFullName(), "Success", JOptionPane.INFORMATION_MESSAGE);
+    JOptionPane.showMessageDialog(guiController.frame,
+        "Visit record added successfully for " + getFullName(),
+        "Success", JOptionPane.INFORMATION_MESSAGE);
   }
 
+  /**
+   * Displays the full information of a patient in a scrollable dialog.
+   *
+   * @param guiController The GUI controller for handling user interactions.
+   */
   public void displayPatientFullInformation(GuiController guiController) {
     String patientInfo = getFullInformation();
     JTextArea textArea = new JTextArea(6, 25);
     textArea.setText(patientInfo);
     textArea.setEditable(false);
     JScrollPane scrollPane = new JScrollPane(textArea);
-    JOptionPane.showMessageDialog(guiController.frame, scrollPane, "Patient Full Information", JOptionPane.INFORMATION_MESSAGE);
+    JOptionPane.showMessageDialog(guiController.frame, scrollPane,
+        "Patient Full Information", JOptionPane.INFORMATION_MESSAGE);
   }
 
   /**

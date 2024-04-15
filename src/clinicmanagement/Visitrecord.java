@@ -3,12 +3,24 @@ package clinicmanagement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Represents a visit record in a clinic management system.
+ */
 public class Visitrecord {
   private LocalDateTime registrationDateTime;
   private String chiefComplaint;
   private double bodyTemperature;
 
-  public Visitrecord(LocalDateTime registrationDateTime, String chiefComplaint, double bodyTemperature) {
+  /**
+   * Constructs a visit record with the specified
+   * registration date and time, chief complaint, and body temperature.
+   *
+   * @param registrationDateTime The date and time when the visit was registered.
+   * @param chiefComplaint       The chief complaint reported by the patient.
+   * @param bodyTemperature      The body temperature of the patient during the visit.
+   */
+  public Visitrecord(LocalDateTime registrationDateTime,
+                     String chiefComplaint, double bodyTemperature) {
     // Assign the values directly without validation in the constructor
     this.registrationDateTime = registrationDateTime;
     this.chiefComplaint = chiefComplaint;
@@ -43,16 +55,24 @@ public class Visitrecord {
 
   @Override
   public String toString() {
-    return "Visit Record: " +
-        "Registration DateTime: " + registrationDateTime +
-        ", Chief Complaint: '" + chiefComplaint + '\'' +
+    return "Visit Record: "
+        +
+        "Registration DateTime: " + registrationDateTime
+        +
+        ", Chief Complaint: '" + chiefComplaint + '\''
+        +
         ", Body Temperature: " + String.format("%.1f", bodyTemperature) + "°C";
   }
 
-  // Private method to check if the last visit occurred within the last year
-  public boolean isLastVisitWithinAYear() {
+  /**
+   * Checks if the last visit occurred within the last year.
+   *
+   * @return True if the last visit occurred within the last year, otherwise false.
+   */
+  public boolean islastvisitwithinayear() {
     LocalDateTime lastVisitDateTime = getRegistrationDateTime();
     LocalDate oneYearAgo = LocalDate.now().minusYears(1);
-    return lastVisitDateTime.toLocalDate().isAfter(oneYearAgo) || lastVisitDateTime.toLocalDate().isEqual(oneYearAgo);
+    return lastVisitDateTime.toLocalDate().isAfter(oneYearAgo)
+        || lastVisitDateTime.toLocalDate().isEqual(oneYearAgo);
   }
 }

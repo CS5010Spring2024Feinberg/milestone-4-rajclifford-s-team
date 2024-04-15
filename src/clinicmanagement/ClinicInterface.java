@@ -1,8 +1,7 @@
 package clinicmanagement;
 
-import javax.swing.*;
 import java.util.List;
-import java.util.Scanner;
+import javax.swing.JFrame;
 
 /**
  * An interface that defines the operations for managing a clinic.
@@ -163,6 +162,8 @@ public interface ClinicInterface {
    */
   void registerNewClinicalStaff(ClinicalStaff staffMember);
 
+  void registerNewClinicalStaff(GuiController guiController);
+
   /**
    * Sends a patient home, releasing them from the clinic.
    *
@@ -184,21 +185,6 @@ public interface ClinicInterface {
    */
   Patient findPatientBySerialNumber(int serialNumber);
 
-  /**
-   * Selects a patient by serial number from user input.
-   *
-   * @param sc The Scanner object to use for user input.
-   * @return The selected patient.
-   */
-  Patient selectPatientBySerialNumber(Scanner sc);
-
-  /**
-   * Assigns clinical staff to a patient.
-   *
-   * @param patientToStaff The patient to assign clinical staff to.
-   * @param serialNumber   The serial number of the clinical staff member.
-   * @param controller     The controller for handling the assignment.
-   */
 
   /**
    * Finds a patient in the existing clinic directory.
@@ -209,29 +195,28 @@ public interface ClinicInterface {
 
   List<Patient> getAllPatients() throws IllegalArgumentException;
 
-  void registerNewPatientGUI(GuiController guiController);
+  void registerNewPatientGui(GuiController guiController);
 
-  void assignPatientToRoomGUI(GuiController guiController);
+  void assignPatientToRoomGui(GuiController guiController);
 
-  void addVisitRecordGUI(GuiController guiController);
+  void addVisitRecordGui(GuiController guiController);
 
-  void registerNewClinicalStaff(GuiController guiController);
+  void assignStaffToPatientGui();
 
-  void assignStaffToPatientGUI();
+  void sendPatientHomeGui(GuiController guiController);
 
-  void sendPatientHomeGUI(GuiController guiController);
+  void deactivateStaffGui();
 
-  void deactivateStaffGUI();
+  void showPatientDetailsGui();
 
-  void showPatientDetailsGUI();
+  void unassignStaffFromPatientGui();
 
-  void unassignStaffFromPatientGUI();
+  void listClinicalStaffAndPatientCountsGui();
 
-  void listClinicalStaffAndPatientCountsGUI();
+  void listInactivePatientsForYearGui();
 
-  void listInactivePatientsForYearGUI();
-
-  void listClinicalStaffWithIncompleteVisitsGUI(List<ClinicalStaff> clinicalStaffList, GuiController guiController);
+  void listClinicalStaffWithIncompleteVisitsGui(List<ClinicalStaff> clinicalStaffList,
+                                                GuiController guiController);
 
   void listPatientsWithMultipleVisitsInLastYear(GuiController guiController);
 }

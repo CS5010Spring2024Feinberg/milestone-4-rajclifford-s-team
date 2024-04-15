@@ -1,12 +1,29 @@
 package clinicmanagement;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 
+
+/**
+ * The {@code GuiController} class manages the graphical user interface (GUI)
+ * for interacting with the clinic management system.
+ * It provides functionalities for creating the main frame, displaying
+ * the clinic map, adding menu items, executing commands, and handling
+ * user interactions.
+ */
 public class GuiController {
 
   protected Clinic clinic;
@@ -14,13 +31,35 @@ public class GuiController {
   protected JLabel clinicMapLabel;
   private Map<Integer, Runnable> commands;
 
+  /**
+   * Creates a new {@code GuiController} with the specified clinic.
+   * Initializes the GUI components and displays them.
+   *
+   * @param clinic The clinic object to be managed by this GUI controller.
+   * @throws IllegalArgumentException If the clinic object is null.
+   */
   public GuiController(Clinic clinic) {
-    this.clinic = clinic;
-    this.commands = new HashMap<>();
-    initializeCommands();
-    initializeGui();
+    try {
+      if (clinic == null) {
+        throw new IllegalArgumentException("Clinic object cannot be null.");
+      }
+      this.clinic = clinic;
+      this.commands = new HashMap<>();
+      initializeCommands();
+      initializeGui();
+    } catch (IllegalArgumentException e) {
+      // Handle the exception gracefully, e.g., display an error message
+      JOptionPane.showMessageDialog(null, "Error: "
+          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
 
+
+  /**
+   * Initializes the graphical user interface (GUI) components.
+   * This method creates the main frame, displays welcome message,
+   * clinic map, and adds menu bar.
+   */
   private void initializeGui() {
     createFrame();
     displayWelcomeMessage();
@@ -29,6 +68,10 @@ public class GuiController {
     frame.setVisible(true); // Set frame visible after adding all components
   }
 
+  /**
+   * Creates the main frame for the clinic management GUI.
+   * The frame includes the title, size, layout, and default close operation.
+   */
   private void createFrame() {
     frame = new JFrame("Clinic Management System");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -38,30 +81,32 @@ public class GuiController {
 
   private void displayWelcomeMessage() {
     String clinicName = clinic.getName(); // Assuming a getName() method exists
-    JLabel welcomeLabel = new JLabel("Welcome to " + clinicName + " Management System!", JLabel.CENTER);
+    JLabel welcomeLabel = new JLabel("Welcome to " + clinicName
+        + " Management System!", JLabel.CENTER);
     welcomeLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
     frame.add(welcomeLabel, BorderLayout.NORTH);
   }
 
   private void initializeCommands() {
-    commands.put(1, () -> clinic.registerNewPatientGUI(this));
-    commands.put(2, () -> clinic.assignPatientToRoomGUI(this));
-    commands.put(3, () -> clinic.addVisitRecordGUI(this));
+    commands.put(1, () -> clinic.registerNewPatientGui(this));
+    commands.put(2, () -> clinic.assignPatientToRoomGui(this));
+    commands.put(3, () -> clinic.addVisitRecordGui(this));
     commands.put(4, () -> clinic.registerNewClinicalStaff(this));
-    commands.put(5, () -> clinic.assignStaffToPatientGUI());
-    commands.put(6, () -> clinic.sendPatientHomeGUI(this));
-    commands.put(7, () -> clinic.deactivateStaffGUI());
-    commands.put(8, () -> clinic.showPatientDetailsGUI());
-    commands.put(9, () -> clinic.unassignStaffFromPatientGUI());
-    commands.put(10, () -> clinic.listClinicalStaffAndPatientCountsGUI());
-    commands.put(11, () -> clinic.listInactivePatientsForYearGUI());
-    commands.put(12, () -> clinic.listClinicalStaffWithIncompleteVisitsGUI(clinic.getClinicalStaffList(), this));
+    commands.put(5, () -> clinic.assignStaffToPatientGui());
+    commands.put(6, () -> clinic.sendPatientHomeGui(this));
+    commands.put(7, () -> clinic.deactivateStaffGui());
+    commands.put(8, () -> clinic.showPatientDetailsGui());
+    commands.put(9, () -> clinic.unassignStaffFromPatientGui());
+    commands.put(10, () -> clinic.listClinicalStaffAndPatientCountsGui());
+    commands.put(11, () -> clinic.listInactivePatientsForYearGui());
+    commands.put(12, () -> clinic.listClinicalStaffWithIncompleteVisitsGui(clinic
+        .getClinicalStaffList(), this));
     commands.put(13, () -> clinic.listPatientsWithMultipleVisitsInLastYear(this));
     commands.put(14, () -> System.exit(0));
   }
 
   private void createMenuBar() {
-    JMenuBar menuBar = new JMenuBar();
+    final JMenuBar menuBar = new JMenuBar();
     JMenu fileMenu = new JMenu("Clinic Menu");
     fileMenu.setFont(new Font("Arial", Font.BOLD, 14));
 
@@ -93,8 +138,9 @@ public class GuiController {
   private void executeCommand(Runnable command) {
     try {
       command.run();
-    } catch (Exception ex) {
-      JOptionPane.showMessageDialog(frame, "Error occurred: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    } catch (IllegalArgumentException ex) {
+      JOptionPane.showMessageDialog(frame, "Error occurred: "
+          + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -105,10 +151,17 @@ public class GuiController {
     frame.add(scrollPane, BorderLayout.CENTER);
   }
 
+  /**
+   * Updates the displayed clinic map image in the GUI.
+   * This method generates a new clinic map image using the ClinicMap class
+   * and sets it as the icon for the clinic map label. If the clinic map
+   * cannot be generated, an error message dialog is displayed.
+   */
   public void updateMapImage() {
     BufferedImage clinicMap = ClinicMap.createClinicMap(clinic);
     if (clinicMap == null) {
-      JOptionPane.showMessageDialog(frame, "Failed to generate clinic map.", "Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(frame, "Failed to generate clinic map.",
+          "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
     ImageIcon newIcon = new ImageIcon(clinicMap);
@@ -117,6 +170,12 @@ public class GuiController {
     clinicMapLabel.repaint();
   }
 
+  /**
+   * Asynchronously updates the clinic map in the GUI.
+   * This method invokes the updateMapImage() method using SwingUtilities.invokeLater(),
+   * ensuring that the update operation is performed on the Event Dispatch Thread (EDT).
+   * This is necessary for safely updating GUI components from a background thread.
+   */
   public void updateClinicMap() {
     SwingUtilities.invokeLater(this::updateMapImage);
   }
