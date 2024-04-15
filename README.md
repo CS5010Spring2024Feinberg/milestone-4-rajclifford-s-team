@@ -14,8 +14,6 @@ Clifford
 
 ### About/Overview
 
-Give a general overview of the problem and how your program solve the problem
-
 The problem facing us is that we need to represent in code a clinic that has rooms of patients and the staff members assigned to those patients, as well as all of their various functions. We accomplish this by using an MVC design pattern where the clinic is the model, a GUI is the view, and the controller takes user input from the GUI and directs actions in the model.
 
 ### List of Features
