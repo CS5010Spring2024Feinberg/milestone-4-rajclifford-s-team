@@ -130,10 +130,16 @@ public interface PatientInterface {
 
 
 
+  /**
+   * Retrieves the full info of the patient.
+   *
+   * @return The full info.
+   */
   String getFullInformation();
 
   /**
    * Forced deactivation in the past.
+   * ONLY FOR TESTING
    * @param deactivationDate setiings
    */
   void deactivateAtPastDate(LocalDate deactivationDate);

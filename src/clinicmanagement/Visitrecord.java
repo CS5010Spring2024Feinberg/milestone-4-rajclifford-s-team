@@ -27,32 +27,72 @@ public class Visitrecord {
     this.bodyTemperature = bodyTemperature;
   }
 
-  // Validation methods
+
+  /**
+   * Validates if the specified registration date and time is not null.
+   *
+   * @param registrationDateTime The date and time to validate.
+   * @return True if the date and time is valid, otherwise false.
+   */
   public static boolean isValidDate(LocalDateTime registrationDateTime) {
+
     return registrationDateTime != null;
   }
 
+  /**
+   * Validates if the specified chief complaint is not null or empty.
+   *
+   * @param chiefComplaint The chief complaint to validate.
+   * @return True if the chief complaint is valid, otherwise false.
+   */
   public static boolean isValidComplaint(String chiefComplaint) {
     return chiefComplaint != null && !chiefComplaint.trim().isEmpty();
   }
 
+  /**
+   * Validates if the specified body temperature is within a reasonable range.
+   *
+   * @param bodyTemperature The body temperature to validate.
+   * @return True if the body temperature is valid, otherwise false.
+   */
   public static boolean isValidTemperature(double bodyTemperature) {
     return bodyTemperature >= 25.0 && bodyTemperature <= 45.0;
   }
 
-  // Getters
+
+  /**
+   * Gets the registration date and time of the visit record.
+   *
+   * @return The registration date and time.
+   */
   public LocalDateTime getRegistrationDateTime() {
     return registrationDateTime;
   }
 
+  /**
+   * Gets the chief complaint recorded during the visit.
+   *
+   * @return The chief complaint.
+   */
   public String getChiefComplaint() {
     return chiefComplaint;
   }
 
+  /**
+   * Gets the body temperature recorded during the visit.
+   *
+   * @return The body temperature.
+   */
   public double getBodyTemperature() {
     return bodyTemperature;
   }
 
+  /**
+   * Returns a string representation of the visit record.
+   *
+   * @return A string containing the registration date and time,
+   *        chief complaint, and body temperature.
+   */
   @Override
   public String toString() {
     return "Visit Record: "

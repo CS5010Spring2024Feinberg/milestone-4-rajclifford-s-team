@@ -193,30 +193,83 @@ public interface ClinicInterface {
    */
   Patient findExistingPatient(Patient newPatient);
 
+  /**
+   * List all patient in the clinic.
+   * @return all patient list
+   */
   List<Patient> getAllPatients() throws IllegalArgumentException;
 
+  /**
+   * Register new patient in the clinic.
+   * @param guiController controller input
+   */
   void registerNewPatientGui(GuiController guiController);
 
+  /**
+   * Assign a patient to a specific room in the clinc.
+   * @param guiController controller input
+   */
   void assignPatientToRoomGui(GuiController guiController);
 
+  /**
+   * Add new visit record for patient in the clinic.
+   * @param guiController controller input
+   */
   void addVisitRecordGui(GuiController guiController);
 
+  /**
+   * Register clinincal staff to patient in the clinic.
+   *
+   */
   void assignStaffToPatientGui();
 
+  /**
+   * Send patient to home from clinic.
+   * @param guiController controller input
+   */
   void sendPatientHomeGui(GuiController guiController);
 
+  /**
+   * Deactivate a specific Clinical Staff in the clinic.
+   *
+   */
   void deactivateStaffGui();
 
+  /**
+   * Shows comprehensive info on patient in the clinic.
+   *
+   */
   void showPatientDetailsGui();
 
+  /**
+   * Unassign a clinical staff from a patient in the clinic.
+   *
+   */
   void unassignStaffFromPatientGui();
 
+  /**
+   * List how many patients have been assigned to the clinical staff.
+   *
+   */
   void listClinicalStaffAndPatientCountsGui();
 
+  /**
+   * List patients that have not visited clinic for an year (not deactive).
+   *
+   */
   void listInactivePatientsForYearGui();
 
+  /**
+   * List staff with ongoing patient visits.
+   * @param guiController controller input
+   * @param clinicalStaffList clinical staff list
+   */
   void listClinicalStaffWithIncompleteVisitsGui(List<ClinicalStaff> clinicalStaffList,
                                                 GuiController guiController);
 
+  /**
+   * Shows patients who have visited the clinic multiple times in last year.
+   * @param guiController controller input
+   */
   void listPatientsWithMultipleVisitsInLastYear(GuiController guiController);
 }

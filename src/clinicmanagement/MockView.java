@@ -203,6 +203,12 @@ public class MockView {
     menuItem.doClick();
   }
 
+  /**
+   * Simulates a user action to assign clinical staff to a patient.
+   *
+   * @param staff   The index of the clinical staff to be assigned.
+   * @param patient The index of the patient to whom the clinical staff will be assigned.
+   */
   public void simulateAssignStaffToPatientPress(int staff, int patient) {
     JMenuItem menuItem = (JMenuItem) this.menu.getMenuComponent(4);
     menuItem.doClick();
