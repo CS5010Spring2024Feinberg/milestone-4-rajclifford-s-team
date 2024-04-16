@@ -272,4 +272,9 @@ public interface ClinicInterface {
    * @param guiController controller input
    */
   void listPatientsWithMultipleVisitsInLastYear(GuiController guiController);
+
+  /**
+   * Clear the whole clinic model data
+   */
+  void clearModel();
 }

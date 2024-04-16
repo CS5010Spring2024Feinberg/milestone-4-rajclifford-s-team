@@ -1473,6 +1473,7 @@ public class Clinic implements ClinicInterface {
    * Clears all data from the clinic model, including patient records, clinical staff records,
    * room assignments, and visit records.
    */
+  @Override
   public void clearModel() {
     clearPatientRecords();
     clearStaffRecords();
