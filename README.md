@@ -54,6 +54,7 @@ The clinic has the ability to:
 - List inactive patients for a year on a GUI
 - List clinical staff with incomplete visits on a GUI
 - List patients with multiple visits in past year on a GUI
+- Clear Current Clinic Data and load a new Clinic File
 
 
 ### How to Run
@@ -90,6 +91,7 @@ Menu 10 : List Clinical Staff and Patient Count
 Menu 11 : List Inactive Patient for Over an Year
 Menu 12 : List Clinical Staff with Incomplete Visit
 Mneu 13 : List Patients with Mutiple Visits in Last Year
+Menu 14 : Clear the Current Clinic and Load new Clinic File
 
 
 
@@ -110,6 +112,7 @@ The changes can be summarized as:
 5. Removed concreate command classes, and scanner input classes (UserInput and ClinicalStaffInput) from Milestone 3.
 6. Streamline Codes to remove any artifacts from the promt based interaction , like message and list displayes and use JTable and GUI dialog boxed to display all neccessary Information.
 7. Used mock model to test the implementation.
+8. Implimented method to clear out the current Clinic data and reload a new clinic file.
 
 
 
@@ -134,6 +137,7 @@ The changes can be summarized as:
 5. The Clinic Managment System does have the provition but not the option to reactivate Clinical Staff.
 6. We only can Accomodate 2 category of Staffs and 3 categories of Rooms which cannot be expanded.
 7. We cannot save the current state of the clinic in the memory or file.
+8. The clinic file should adhere to the structure and rules as per the template provided in the clinicfile.txt in /res.
 
 
 ### Citations
