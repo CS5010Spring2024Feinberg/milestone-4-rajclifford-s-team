@@ -8,6 +8,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.ImageIcon;
@@ -23,7 +24,6 @@ import javax.swing.border.EmptyBorder;
 
 
 
-
 /**
  * The {@code GuiController} class manages the graphical user interface (GUI)
  * for interacting with the clinic management system.
@@ -36,7 +36,7 @@ public class GuiController {
   protected Clinic clinic;
   protected JFrame frame;
   protected JLabel clinicMapLabel;
-  private Map<Integer, Runnable> commands;
+  private Map<Integer, Command> commands;
 
   /**
    * Creates a new {@code GuiController} with the specified clinic.
@@ -46,21 +46,14 @@ public class GuiController {
    * @throws IllegalArgumentException If the clinic object is null.
    */
   public GuiController(Clinic clinic) {
-    try {
-      if (clinic == null) {
-        throw new IllegalArgumentException("Clinic object cannot be null.");
-      }
-      this.clinic = clinic;
-      this.commands = new HashMap<>();
-      initializeCommands();
-      initializeGui();
-    } catch (IllegalArgumentException e) {
-      // Handle the exception gracefully, e.g., display an error message
-      JOptionPane.showMessageDialog(null, "Error: "
-          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    if (clinic == null) {
+      throw new IllegalArgumentException("Clinic object cannot be null.");
     }
+    this.clinic = clinic;
+    this.commands = new HashMap<>();
+    initializeCommands();
+    initializeGui();
   }
-
 
   /**
    * Initializes the graphical user interface (GUI) components.
@@ -86,6 +79,9 @@ public class GuiController {
     frame.setLayout(new BorderLayout()); // Set BorderLayout for the frame
   }
 
+  /**
+   * Displays Welcome bar in the GUI.
+   */
   private void displayWelcomeMessage() {
     String clinicName = clinic.getName();
     JLabel welcomeLabel = new JLabel("Welcome to " + clinicName
@@ -94,6 +90,9 @@ public class GuiController {
     frame.add(welcomeLabel, BorderLayout.NORTH);
   }
 
+  /**
+   * Initializes the commands associated with menu items.
+   */
   private void initializeCommands() {
     commands.put(1, () -> clinic.registerNewPatientGui(this));
     commands.put(2, () -> clinic.assignPatientToRoomGui(this));
@@ -113,6 +112,9 @@ public class GuiController {
     commands.put(15, () -> System.exit(0));
   }
 
+  /**
+   * Creates the menu bar in the GUI.
+   */
   private void createMenuBar() {
     final JMenuBar menuBar = new JMenuBar();
     JMenu fileMenu = new JMenu("Clinic Menu");
@@ -137,21 +139,33 @@ public class GuiController {
     frame.setJMenuBar(menuBar);
   }
 
+  /**
+   * Add the command items as items in menu bar in the GUI.
+   */
   private void addMenuItem(JMenu menu, String title, int commandKey) {
     JMenuItem menuItem = new JMenuItem(title);
     menuItem.addActionListener(e -> executeCommand(commands.get(commandKey)));
     menu.add(menuItem);
   }
 
-  private void executeCommand(Runnable command) {
+
+  /**
+   * Executes the specified command.
+   *
+   * @param command The command to execute.
+   */
+  private void executeCommand(Command command) {
     try {
-      command.run();
-    } catch (IllegalArgumentException ex) {
+      command.execute();
+    } catch (IllegalArgumentException | IOException ex) {
       JOptionPane.showMessageDialog(frame, "Error occurred: "
           + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
   }
 
+  /**
+   * Displays the clinic map in the GUI.
+   */
   private void displayClinicMap() {
     clinicMapLabel = new JLabel();
     updateMapImage();
@@ -159,9 +173,11 @@ public class GuiController {
     frame.add(scrollPane, BorderLayout.CENTER);
   }
 
-
+  /**
+   * Loads a new clinic file into the GUI.
+   */
   private void loadNewClinicFile() {
-    // Clear the model
+    // Clear the current clinic model
     clinic.clearModel();
 
     // Prompt the user to select a new clinic data file
@@ -179,15 +195,17 @@ public class GuiController {
         String newName = newClinic.getName();
         clinic.setName(newName);
 
-        updateMapImage(); // Update the map
+        // Update the map
+        updateMapImage();
         updateClinicMap();
-        updateWelcomeMessage(); // Update welcome message with new clinic name
+        // Update welcome message with new clinic name
+        updateWelcomeMessage();
+        // Show success message
         JOptionPane.showMessageDialog(frame, "New clinic data loaded successfully.");
       } else {
         // Error loading clinic data from the new file
-        JOptionPane.showMessageDialog(frame, "Failed to load clinic data from "
-            +
-            "the new file.", "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(frame, "Failed to load clinic data from the new file.",
+            "Error", JOptionPane.ERROR_MESSAGE);
       }
     } else {
       // No file selected, display message and do nothing
@@ -195,6 +213,9 @@ public class GuiController {
     }
   }
 
+  /**
+   * Updates the displayed welcome message with the current clinic name.
+   */
   private void updateWelcomeMessage() {
     String clinicName = clinic.getName();
     Component[] components = frame.getContentPane().getComponents();
@@ -208,7 +229,6 @@ public class GuiController {
       }
     }
   }
-
 
   /**
    * Updates the displayed clinic map image in the GUI.
@@ -238,7 +258,5 @@ public class GuiController {
   public void updateClinicMap() {
     SwingUtilities.invokeLater(this::updateMapImage);
   }
+
 }
-
-
-
