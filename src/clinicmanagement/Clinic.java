@@ -1468,7 +1468,56 @@ public class Clinic implements ClinicInterface {
         "Patients with Multiple Visits in Last Year",
         JOptionPane.INFORMATION_MESSAGE);
   }
+
+  /**
+   * Clears all data from the clinic model, including patient records, clinical staff records,
+   * room assignments, and visit records.
+   */
+  public void clearModel() {
+    clearPatientRecords();
+    clearStaffRecords();
+    clearRoom();
+    clearVisitRecords();
+  }
+
+  /**
+   * Clears the patient records in the clinic model.
+   */
+  private void clearPatientRecords() {
+    patients.clear(); // Assuming patients is a list of Patient objects
+  }
+
+  /**
+   * Clears the staff records in the clinic model.
+   */
+  private void clearStaffRecords() {
+    staff.clear();
+  }
+
+  /**
+   * Clears the room assignments and deletes the rooms in the clinic model.
+   */
+  private void clearRoom() {
+    for (Room room : rooms) {
+      room.getAssignedPatients().clear(); // Clearing the list of assigned patients for each room
+    }
+    rooms.clear(); // Clearing the list of rooms
+  }
+
+  /**
+   * Clears the visit records for all patients in the clinic model.
+   */
+  private void clearVisitRecords() {
+    for (Patient patient : patients) {
+      patient.clearVisitRecords();
+    }
+  }
+
 }
+
+
+
+
 
 
 

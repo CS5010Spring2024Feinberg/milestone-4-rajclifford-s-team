@@ -1,8 +1,13 @@
 package clinicmanagement;
 
+import static clinicmanagement.GuiDriver.initializeClinic;
+import static clinicmanagement.GuiDriver.selectClinicFile;
+
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.ImageIcon;
@@ -15,6 +20,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+
+
 
 
 /**
@@ -80,7 +87,7 @@ public class GuiController {
   }
 
   private void displayWelcomeMessage() {
-    String clinicName = clinic.getName(); // Assuming a getName() method exists
+    String clinicName = clinic.getName();
     JLabel welcomeLabel = new JLabel("Welcome to " + clinicName
         + " Management System!", JLabel.CENTER);
     welcomeLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -102,7 +109,8 @@ public class GuiController {
     commands.put(12, () -> clinic.listClinicalStaffWithIncompleteVisitsGui(clinic
         .getClinicalStaffList(), this));
     commands.put(13, () -> clinic.listPatientsWithMultipleVisitsInLastYear(this));
-    commands.put(14, () -> System.exit(0));
+    commands.put(14, this::loadNewClinicFile);
+    commands.put(15, () -> System.exit(0));
   }
 
   private void createMenuBar() {
@@ -123,8 +131,8 @@ public class GuiController {
     addMenuItem(fileMenu, "List Inactive Patients for Over a Year", 11);
     addMenuItem(fileMenu, "List Clinical Staff with Incomplete Visit", 12);
     addMenuItem(fileMenu, "List Patients with Multiple Visits in Last Year", 13);
-    addMenuItem(fileMenu, "Exit", 14);
-
+    addMenuItem(fileMenu, "Clear the Current Clinic and Load new Clinic File", 14);
+    addMenuItem(fileMenu, "Exit", 15);
     menuBar.add(fileMenu);
     frame.setJMenuBar(menuBar);
   }
@@ -150,6 +158,57 @@ public class GuiController {
     JScrollPane scrollPane = new JScrollPane(clinicMapLabel);
     frame.add(scrollPane, BorderLayout.CENTER);
   }
+
+
+  private void loadNewClinicFile() {
+    // Clear the model
+    clinic.clearModel();
+
+    // Prompt the user to select a new clinic data file
+    JOptionPane.showMessageDialog(frame, "Please select a new clinic data file.");
+    File selectedFile = selectClinicFile();
+
+    if (selectedFile != null) {
+      Clinic newClinic = initializeClinic(selectedFile.getAbsolutePath());
+
+      if (newClinic != null) {
+        // Clinic initialized successfully with data from the new file
+        clinic = newClinic; // Update clinic reference
+
+        // Update clinic name
+        String newName = newClinic.getName();
+        clinic.setName(newName);
+
+        updateMapImage(); // Update the map
+        updateClinicMap();
+        updateWelcomeMessage(); // Update welcome message with new clinic name
+        JOptionPane.showMessageDialog(frame, "New clinic data loaded successfully.");
+      } else {
+        // Error loading clinic data from the new file
+        JOptionPane.showMessageDialog(frame, "Failed to load clinic data from "
+            +
+            "the new file.", "Error", JOptionPane.ERROR_MESSAGE);
+      }
+    } else {
+      // No file selected, display message and do nothing
+      JOptionPane.showMessageDialog(frame, "No new clinic data file selected.");
+    }
+  }
+
+  private void updateWelcomeMessage() {
+    String clinicName = clinic.getName();
+    Component[] components = frame.getContentPane().getComponents();
+    for (Component component : components) {
+      if (component instanceof JLabel) {
+        JLabel label = (JLabel) component;
+        if (label.getText().startsWith("Welcome to ")) {
+          label.setText("Welcome to " + clinicName + " Management System!");
+          return;
+        }
+      }
+    }
+  }
+
 
   /**
    * Updates the displayed clinic map image in the GUI.
@@ -180,3 +239,6 @@ public class GuiController {
     SwingUtilities.invokeLater(this::updateMapImage);
   }
 }
+
+
+

@@ -680,6 +680,13 @@ public class Patient implements PatientInterface {
     }
   }
 
+  /**
+   * Clears the visit records for this patient.
+   */
+  public void clearVisitRecords() {
+    visitRecords.clear();
+  }
+
   @Override
   public String toString() {
     return firstName + " " + lastName + " - DOB: " + dateOfBirth;

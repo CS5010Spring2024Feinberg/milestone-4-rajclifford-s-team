@@ -20,55 +20,94 @@ public class GuiDriver {
    * @param args Command-line arguments (not used).
    */
   public static void main(String[] args) {
-    SwingUtilities.invokeLater(() -> {
-      // Welcome dialog
-      JOptionPane.showMessageDialog(
-          null,
-          "Welcome to the Clinic Management Centre \n (By: Rajorshi and Cliford)."
-              +
-              "\nPlease select the clinic file to start.",
-          "Welcome",
-          JOptionPane.INFORMATION_MESSAGE
-      );
-
-      JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
-      fileChooser.setDialogTitle("Select Clinic Data File");
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-      int result = fileChooser.showOpenDialog(null);
-      // Null parent component centers it on the screen
-
-      if (result == JFileChooser.APPROVE_OPTION) {
-        File selectedFile = fileChooser.getSelectedFile();
-        Clinic clinic = initializeClinic(selectedFile.getAbsolutePath());
-
-        if (clinic != null) {
-          // Clinic data loaded successfully, proceed to initialize the GUI
-          new GuiController(clinic);
-        } else {
-          // Clinic data failed to load, show an error message and exit
-          JOptionPane.showMessageDialog(null, "Failed to load clinic data.", "Error",
-              JOptionPane.ERROR_MESSAGE);
-          System.exit(1);
-        }
-      } else {
-        // Exit if no file is chosen
-        System.out.println("No file selected, application will exit.");
-        System.exit(0);
-      }
-    });
+    if (args.length > 0) {
+      // Notify the user that command-line arguments are not supported
+      System.out.println("Command-line arguments are not supported for this program.");
+      System.out.println("The GUI will be launched without processing the command-line arguments.");
+      System.out.println();
+    }
+    SwingUtilities.invokeLater(GuiDriver::runGui);
   }
 
-  private static Clinic initializeClinic(String filePath) {
+  /**
+   * Runs the GUI application.
+   */
+  private static void runGui() {
+    showWelcomeMessage();
+    File selectedFile = selectClinicFile();
+    if (selectedFile != null) {
+      Clinic clinic = initializeClinic(selectedFile.getAbsolutePath());
+      if (clinic != null) {
+        startGui(clinic);
+      } else {
+        showError("Failed to load clinic data.");
+        System.exit(1);
+      }
+    } else {
+      System.out.println("No file selected, application will exit.");
+      System.exit(0);
+    }
+  }
+
+  /**
+   * Displays the welcome message.
+   */
+  private static void showWelcomeMessage() {
+    JOptionPane.showMessageDialog(
+        null,
+        "Welcome to the Clinic Management Centre \n (By: Rajorshi and Cliford)."
+            + "\nPlease select the clinic file to start.",
+        "Welcome",
+        JOptionPane.INFORMATION_MESSAGE
+    );
+  }
+
+  /**
+   * Prompts the user to select a clinic data file.
+   *
+   * @return The selected clinic data file, or null if no file is selected.
+   */
+  protected static File selectClinicFile() {
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+    fileChooser.setDialogTitle("Select Clinic Data File");
+    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    int result = fileChooser.showOpenDialog(null);
+    return result == JFileChooser.APPROVE_OPTION ? fileChooser.getSelectedFile() : null;
+  }
+
+  /**
+   * Initializes the clinic with data from the selected file.
+   *
+   * @param filePath The path of the selected clinic data file.
+   * @return The initialized clinic object, or null if initialization fails.
+   */
+  protected static Clinic initializeClinic(String filePath) {
     Clinic clinic = null;
     try (FileReader fileReader = new FileReader(filePath)) {
       ClinicFileParser fileParser = new ClinicFileParser(fileReader);
       clinic = fileParser.parseFile(); // Parses clinic information from the file
     } catch (IOException e) {
-      JOptionPane.showMessageDialog(null, "Failed to parse clinic file: "
-          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      showError("Failed to parse clinic file: " + e.getMessage());
     }
-    return clinic; // Return the clinic object (could be null if an exception occurred)
+    return clinic;
+  }
+
+  /**
+   * Starts the GUI with the given clinic object.
+   *
+   * @param clinic The clinic object to be managed by the GUI controller.
+   */
+  private static void startGui(Clinic clinic) {
+    new GuiController(clinic);
+  }
+
+  /**
+   * Displays an error message dialog.
+   *
+   * @param message The error message to display.
+   */
+  private static void showError(String message) {
+    JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
   }
 }
