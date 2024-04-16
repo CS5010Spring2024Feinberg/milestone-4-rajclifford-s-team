@@ -274,7 +274,7 @@ public interface ClinicInterface {
   void listPatientsWithMultipleVisitsInLastYear(GuiController guiController);
 
   /**
-   * Clear the whole clinic model data
+   * Clear the whole clinic model data.
    */
   void clearModel();
 }
